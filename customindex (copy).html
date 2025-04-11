@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase Chat</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+     body {
+    font-family: Arial;
+    padding: 20px;
+    background: #f4f4f4;
+    max-width: 600px;
+    margin: auto;
+  }
+
+  #chatBox {
+    height: 300px;
+    overflow-y: scroll;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+  }
+
+  input[type="text"], input[type="password"] {
+    width: 70%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  button {
+    padding: 8px 12px;
+    margin-left: 5px;
+  }
+
+  @media (max-width: 600px) {
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 5px;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h2>Login</h2>
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
+
+  <div id="chatApp" style="display:none;">
+    <h3>Welcome, <span id="userName"></span></h3>
+    <div id="chatBox"></div>
+    <input type="text" id="messageInput" placeholder="Type your message" onkeydown="checkEnter(event)">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="clearChat()">Clear Chat</button>
+  </div>
+
+  <script>
+    // ✅ Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFP_dLmK45O0FP_I_5U1CNf30Yj7LT6i8",
+      authDomain: "mychatapp-1f010.firebaseapp.com",
+      databaseURL: "https://mychatapp-1f010-default-rtdb.firebaseio.com", // ✅ ADD THIS LINE
+      projectId: "mychatapp-1f010",
+      storageBucket: "mychatapp-1f010.appspot.com", // 🔁 Small fix: change `.firebasestorage.app` to `.appspot.com`
+      messagingSenderId: "899054823751",
+      appId: "1:899054823751:web:c1679b49165184fa9a4462"
+    };
+
+    // 🔥 Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const users = { "pass1": "User1", "pass2": "User2" };
+    let currentUser = "";
+
+
+
+    function login() {
+      const pw = document.getElementById("password").value;
+      if (users[pw]) {
+        currentUser = users[pw];
+        document.getElementById("userName").innerText = currentUser;
+        document.getElementById("login").style.display = "none";
+        document.getElementById("chatApp").style.display = "block";
+        listenToChat();
+      } else {
+        document.getElementById("loginError").innerText = "Wrong password!";
+      }
+    }
+
+    function checkEnter(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+  const msg = document.getElementById("messageInput").value.trim();
+  if (!msg) return;
+  const now = new Date().toLocaleString();
+  const chatMessage = {
+    user: currentUser,
+    message: msg,
+    time: now
+  };
+  console.log("Sending message:", chatMessage); // ✅ ADD THIS LINE
+  db.ref("chat").push(chatMessage);
+  document.getElementById("messageInput").value = "";
+}
+
+    function renderMessage(data) {
+  const { user, message, time } = data;
+  const bold = user === currentUser ? "<strong>" : "";
+  const endBold = user === currentUser ? "</strong>" : "";
+  return `[${time}] ${bold}${user}: ${message}${endBold}`;
+}
+    function listenToChat() {
+      const chatBox = document.getElementById("chatBox");
+      db.ref("chat").on("value", snapshot => {
+        const chat = snapshot.val();
+        chatBox.innerText = "";
+        for (let key in chat) {
+          chatBox.innerHTML += renderMessage(chat[key]) + "<br>";
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+
+    function clearChat() {
+      db.ref("chat").remove();
+    }
+  </script>
+</body>
+</html>

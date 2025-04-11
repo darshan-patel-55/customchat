@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Firebase Chat</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.6.2/index.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/emoji-button.min.js"></script>
+
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    #login, #chatApp {
+      padding: 20px;
+    }
+
+    #chatBox {
+      height: 50vh;
+      overflow-y: auto;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message {
+      padding: 8px 10px;
+      border-radius: 10px;
+      max-width: 70%;
+      word-wrap: break-word;
+      background-color: #e4e6eb;
+    }
+
+    .message.own {
+      background-color: #d4edc9;
+      align-self: flex-end;
+    }
+
+    .sender {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .timestamp {
+      font-size: 0.8em;
+      text-align: right;
+      margin-top: 4px;
+      color: #666;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: row;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .input-group input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 15px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button, input[type="text"] {
+        width: 100%;
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h2>Login</h2>
+    <input type="password" id="password" placeholder="Enter password" style="width: 100%; padding: 12px; font-size: 16px;">
+    <button onclick="login()" style="margin-top: 10px; width: 100%; font-size: 16px;">Login</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
+
+  <div id="chatApp" style="display:none; flex-grow: 1;">
+    <h3>Welcome, <span id="userName"></span></h3>
+    <div id="chatBox"></div>
+    <div class="input-group">
+      <input type="text" id="messageInput" placeholder="Type your message">
+      <button id="emoji-toggle">😊</button>
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="clearChat()">Clear</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFP_dLmK45O0FP_I_5U1CNf30Yj7LT6i8",
+      authDomain: "mychatapp-1f010.firebaseapp.com",
+      databaseURL: "https://mychatapp-1f010-default-rtdb.firebaseio.com",
+      projectId: "mychatapp-1f010",
+      storageBucket: "mychatapp-1f010.appspot.com",
+      messagingSenderId: "899054823751",
+      appId: "1:899054823751:web:c1679b49165184fa9a4462"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const users = { "drpdkn72": "Darshan", "divya@123": "Divya" };
+    let currentUser = "";
+
+    function login() {
+      const pw = document.getElementById("password").value;
+      if (users[pw]) {
+        currentUser = users[pw];
+        document.getElementById("userName").innerText = currentUser;
+        document.getElementById("login").style.display = "none";
+        document.getElementById("chatApp").style.display = "block";
+        listenToChat();
+      } else {
+        document.getElementById("loginError").innerText = "Wrong password!";
+      }
+    }
+
+    function sendMessage() {
+      const msg = document.getElementById("messageInput").value.trim();
+      if (!msg) return;
+      const now = new Date().toLocaleString();
+      const chatMessage = {
+        user: currentUser,
+        message: msg,
+        time: now
+      };
+      db.ref("chat").push(chatMessage);
+      document.getElementById("messageInput").value = "";
+    }
+
+    function renderMessage(data) {
+      const { user, message, time } = data;
+      const isCurrent = user === currentUser;
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "message" + (isCurrent ? " own" : "");
+
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "sender";
+      nameDiv.innerText = user;
+
+      const msgText = document.createElement("div");
+      msgText.innerText = message;
+
+      const timeDiv = document.createElement("div");
+      timeDiv.className = "timestamp";
+      timeDiv.innerText = time;
+
+      msgDiv.appendChild(nameDiv);
+      msgDiv.appendChild(msgText);
+      msgDiv.appendChild(timeDiv);
+
+      return msgDiv;
+    }
+
+    function listenToChat() {
+      const chatBox = document.getElementById("chatBox");
+      db.ref("chat").on("value", snapshot => {
+        const chat = snapshot.val();
+        chatBox.innerHTML = "";
+        for (let key in chat) {
+          chatBox.appendChild(renderMessage(chat[key]));
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+
+    function clearChat() {
+      db.ref("chat").remove();
+    }
+
+    function toggleEmojiPicker() {
+      alert("Emoji picker will appear here (implementation placeholder).");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("messageInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") sendMessage();
+      });
+    });
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    const picker = new EmojiButton({
+      position: 'top-start',
+      theme: 'light' // or "dark"
+    });
+
+    const button = document.querySelector('#emoji-toggle');
+    const input = document.querySelector('#messageInput');
+
+    picker.on('emoji', emoji => {
+      input.value += emoji;
+      input.focus();
+    });
+
+    button.addEventListener('click', () => {
+      picker.togglePicker(button);
+    });
+  });
+  </script>
+</body>
+</html>
