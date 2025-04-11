@@ -143,54 +143,129 @@
       }
     }
 
+    let editMessageKey = null;
+
+    function startEditMessage(key, oldMessage) {
+      document.getElementById("messageInput").value = oldMessage;
+      editMessageKey = key;
+
+      const sendBtn = document.querySelector("button[onclick='sendMessage()']");
+      sendBtn.innerText = "Update";
+
+      // Show cancel button
+      let cancelBtn = document.getElementById("cancelEditBtn");
+      if (!cancelBtn) {
+        cancelBtn = document.createElement("button");
+        cancelBtn.id = "cancelEditBtn";
+        cancelBtn.innerText = "Cancel";
+        cancelBtn.style.backgroundColor = "#ccc";
+        cancelBtn.style.marginLeft = "5px";
+        cancelBtn.onclick = cancelEdit;
+        sendBtn.parentNode.appendChild(cancelBtn);
+      }
+    }
+
+    function cancelEdit() {
+      editMessageKey = null;
+      document.getElementById("messageInput").value = "";
+
+      const sendBtn = document.querySelector("button[onclick='sendMessage()']");
+      sendBtn.innerText = "Send";
+
+      const cancelBtn = document.getElementById("cancelEditBtn");
+      if (cancelBtn) cancelBtn.remove();
+    }
+
+
+
     function sendMessage() {
       const msg = document.getElementById("messageInput").value.trim();
       if (!msg) return;
-      const now = new Date().toLocaleString();
-      const chatMessage = {
-        user: currentUser,
-        message: msg,
-        time: now
-      };
-      db.ref("chat").push(chatMessage);
-      document.getElementById("messageInput").value = "";
-    }
-
-    function renderMessage(data) {
-      const { user, message, time } = data;
-      const isCurrent = user === currentUser;
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "message" + (isCurrent ? " own" : "");
-
-      const nameDiv = document.createElement("div");
-      nameDiv.className = "sender";
-      nameDiv.innerText = user;
-
-      const msgText = document.createElement("div");
-      msgText.innerText = message;
-
-      const timeDiv = document.createElement("div");
-      timeDiv.className = "timestamp";
-      timeDiv.innerText = time;
-
-      msgDiv.appendChild(nameDiv);
-      msgDiv.appendChild(msgText);
-      msgDiv.appendChild(timeDiv);
-
-      return msgDiv;
-    }
-
-    function listenToChat() {
-      const chatBox = document.getElementById("chatBox");
-      db.ref("chat").on("value", snapshot => {
-        const chat = snapshot.val();
-        chatBox.innerHTML = "";
-        for (let key in chat) {
-          chatBox.appendChild(renderMessage(chat[key]));
-        }
-        chatBox.scrollTop = chatBox.scrollHeight;
+      const now = new Date().toLocaleString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
       });
+
+      if (editMessageKey) {
+        db.ref("chat/" + editMessageKey).update({
+          message: msg,
+          time: now + " (edited)",
+        });
+        editMessageKey = null;
+        document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
+      } else {
+        const chatMessage = {
+          user: currentUser,
+          message: msg,
+          time: now
+        };
+        db.ref("chat").push(chatMessage);
+      }
+
+      document.getElementById("messageInput").value = "";
+  }
+
+function renderMessage(data, key) {
+  const { user, message, time } = data;
+  const isCurrent = user === currentUser;
+
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "message" + (isCurrent ? " own" : "");
+
+  const nameDiv = document.createElement("div");
+  nameDiv.className = "sender";
+  nameDiv.innerText = user;
+
+  const msgText = document.createElement("div");
+  msgText.innerText = message;
+  msgText.className = "msgText";
+
+  const timeDiv = document.createElement("div");
+  timeDiv.className = "timestamp";
+  timeDiv.innerText = time;
+
+  // Optional formatting: make "(edited)" italic and gray
+  if (time.includes("(edited)")) {
+    const parts = time.split("(edited)");
+    timeDiv.innerHTML = `${parts[0]} <span style="font-style:italic; color:gray;">(edited)</span>`;
+  } else {
+    timeDiv.innerText = time;
+  }
+
+  msgDiv.appendChild(nameDiv);
+  msgDiv.appendChild(msgText);
+  msgDiv.appendChild(timeDiv);
+
+  // Add Edit button
+  if (isCurrent) {
+    const editBtn = document.createElement("button");
+    editBtn.innerText = "Edit";
+    editBtn.style.marginTop = "5px";
+    editBtn.onclick = () => startEditMessage(key, message);
+    msgDiv.appendChild(editBtn);
+  }
+
+  return msgDiv;
+}
+
+
+function listenToChat() {
+  const chatBox = document.getElementById("chatBox");
+  db.ref("chat").on("value", snapshot => {
+    const chat = snapshot.val();
+    chatBox.innerHTML = "";
+    for (let key in chat) {
+      chatBox.appendChild(renderMessage(chat[key], key));
     }
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+}
+
 
     function clearChat() {
       db.ref("chat").remove();
@@ -229,6 +304,7 @@ window.addEventListener('DOMContentLoaded', () => {
       picker.togglePicker(button);
     });
   });
+
 
 
 
