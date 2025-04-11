@@ -103,6 +103,8 @@
 
   <div id="chatApp" style="display:none; flex-grow: 1;">
     <h3>Welcome, <span id="userName"></span></h3>
+    <p id="presenceInfo" style="margin-bottom: 10px;"></p>
+<div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
     <div id="chatBox"></div>
     <div class="input-group">
       <input type="text" id="messageInput" placeholder="Type your message">
@@ -227,6 +229,88 @@ window.addEventListener('DOMContentLoaded', () => {
       picker.togglePicker(button);
     });
   });
+
+
+
+
+
+
+
+
+function setUserOnlineStatus() {
+  const userStatusRef = db.ref(`status/${currentUser}`);
+  const connectedRef = db.ref(".info/connected");
+
+  connectedRef.on("value", (snap) => {
+    if (snap.val() === false) return;
+
+    userStatusRef.onDisconnect().set({ state: "offline", lastChanged: Date.now() });
+    userStatusRef.set({ state: "online", lastChanged: Date.now() });
+  });
+}
+
+
+function login() {
+  const pw = document.getElementById("password").value;
+  if (users[pw]) {
+    currentUser = users[pw];
+    document.getElementById("userName").innerText = currentUser;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chatApp").style.display = "block";
+
+    setUserOnlineStatus();       // 👈 Setup presence
+    listenToChat();              // 👈 Start chat listener
+    listenToStatus();            // 👈 Start presence UI
+  } else {
+    document.getElementById("loginError").innerText = "Wrong password!";
+  }
+}
+
+
+
+function listenToStatus() {
+  const statusRef = db.ref("status");
+  const presenceInfo = document.getElementById("presenceInfo");
+  const lastSeenInfo = document.getElementById("lastSeenInfo");
+
+  statusRef.on("value", (snapshot) => {
+    const statuses = snapshot.val() || {};
+    let infoText = "";
+    let lastSeenText = "";
+
+    for (const user of Object.values(users)) {
+      if (user === currentUser) {
+        const state = statuses[user]?.state === "online" ? "🟢" : "🟡";
+        document.getElementById("userName").innerText = `${user} ${state}`;
+        continue;
+      }
+
+      const state = statuses[user]?.state === "online" ? "Online 🟢" : "Offline 🟡";
+      infoText += `${user} is ${state}  `;
+
+      // Show last seen ONLY if the user is offline
+      if (statuses[user]?.state === "offline" && statuses[user]?.lastChanged) {
+<!--        const time = new Date(statuses[user].lastChanged).toLocaleString();-->
+        const time = new Date(statuses[user].lastChanged).toLocaleString('en-US', {
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true,
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+        lastSeenText += `${user} was last seen: ${time}\n`;
+      }
+    }
+
+    presenceInfo.innerText = infoText.trim();
+    lastSeenInfo.innerText = lastSeenText.trim();
+  });
+}
+
+
+
+
   </script>
 </body>
 </html>
