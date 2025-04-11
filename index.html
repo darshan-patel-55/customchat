@@ -87,7 +87,7 @@
       }
 
       button, input[type="text"] {
-        width: 100%;
+        width: -webkit-fill-available;
         font-size: 18px;
       }
     }
@@ -96,7 +96,7 @@
 <body>
   <div id="login">
     <h2>Login</h2>
-    <input type="password" id="password" placeholder="Enter password" style="width: 100%; padding: 12px; font-size: 16px;">
+    <input type="password" id="password" placeholder="Enter password" style="width: -webkit-fill-available; padding: 12px; font-size: 16px;">
     <button onclick="login()" style="margin-top: 10px; width: 100%; font-size: 16px;">Login</button>
     <p id="loginError" style="color:red;"></p>
   </div>
@@ -106,7 +106,6 @@
     <div id="chatBox"></div>
     <div class="input-group">
       <input type="text" id="messageInput" placeholder="Type your message">
-      <button id="emoji-toggle">😊</button>
       <button onclick="sendMessage()">Send</button>
       <button onclick="clearChat()">Clear</button>
     </div>
@@ -202,6 +201,9 @@
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("messageInput").addEventListener("keypress", function (e) {
         if (e.key === "Enter") sendMessage();
+      });
+      document.getElementById("password").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") login();
       });
     });
 
