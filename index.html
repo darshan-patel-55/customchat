@@ -38,11 +38,46 @@
     }
 
     .message {
-      padding: 8px 10px;
-      border-radius: 10px;
-      max-width: 70%;
-      word-wrap: break-word;
-      background-color: #e4e6eb;
+      position: relative;
+    }
+
+    .menu-icon {
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .message:hover .menu-icon {
+      display: block;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 25px;
+      right: 5px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+      min-width: 100px;
+    }
+
+    .dropdown a {
+      padding: 8px 12px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .dropdown a:hover {
+      background: #f0f0f0;
     }
 
     .message.own {
@@ -127,7 +162,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const users = { "drpdkn72": "Darshan", "divya@123": "Divya" };
+    const users = { "d2": "D2", "d1": "D1" };
     let currentUser = "";
 
     function login() {
@@ -243,15 +278,50 @@ function renderMessage(data, key) {
 
   // Add Edit button
   if (isCurrent) {
-    const editBtn = document.createElement("a");
-    editBtn.innerText = "Edit";
-    editBtn.style.marginTop = "5px";
-    editBtn.style.fontSize = "smaller";
-    editBtn.style.fontSize = "smaller";
-    editBtn.style.cursor = "pointer";
-    editBtn.onclick = () => startEditMessage(key, message);
-    msgDiv.appendChild(editBtn);
-  }
+  // ⋮ Menu icon
+  const menuIcon = document.createElement("div");
+  menuIcon.className = "menu-icon";
+  menuIcon.innerText = "⋮";
+
+  // Dropdown menu
+  const dropdown = document.createElement("div");
+  dropdown.className = "dropdown";
+
+  // Edit option
+  const editOption = document.createElement("a");
+  editOption.innerText = "Edit";
+  editOption.onclick = () => {
+    startEditMessage(key, message);
+    dropdown.style.display = "none";
+  };
+
+  // Delete option
+  const deleteOption = document.createElement("a");
+  deleteOption.innerText = "Delete";
+  deleteOption.onclick = () => {
+    if (confirm("Are you sure you want to delete this message?")) {
+      db.ref("chat/" + key).remove();
+    }
+    dropdown.style.display = "none";
+  };
+
+  // Append options
+  dropdown.appendChild(editOption);
+  dropdown.appendChild(deleteOption);
+  msgDiv.appendChild(menuIcon);
+  msgDiv.appendChild(dropdown);
+
+  // Toggle dropdown visibility
+  menuIcon.onclick = (e) => {
+    e.stopPropagation();
+    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+  };
+
+  // Hide dropdown on outside click
+  document.addEventListener("click", () => {
+    dropdown.style.display = "none";
+  }, { once: true });
+}
 
   return msgDiv;
 }
