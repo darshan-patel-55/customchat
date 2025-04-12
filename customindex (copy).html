@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.6.2/index.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/emoji-button.min.js"></script>
-
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
   <style>
     body {
@@ -38,8 +38,21 @@
     }
 
     .message {
-      position: relative;
-    }
+  position: relative;
+  max-width: 70%;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+  word-wrap: break-word;
+  animation: fadeIn 0.3s ease;
+}
+
+.message:hover {
+  transform: scale(1.02);
+}
+
 
     .menu-icon {
       position: absolute;
@@ -80,21 +93,38 @@
       background: #f0f0f0;
     }
 
+
+
     .message.own {
-      background-color: #d4edc9;
+      background: linear-gradient(135deg, #dcf8c6, #b4eeb2);
       align-self: flex-end;
+      border-bottom-right-radius: 0;
     }
+
+    .message:not(.own) {
+      background: linear-gradient(135deg, #f1f0f0, #e1e1e1);
+      border-bottom-left-radius: 0;
+    }
+
 
     .sender {
       font-weight: bold;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
+      color: #3b3b3b;
     }
 
+
+
     .timestamp {
-      font-size: 0.8em;
+      font-size: 0.75em;
       text-align: right;
-      margin-top: 4px;
-      color: #666;
+      margin-top: 6px;
+      color: #888;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .input-group {
@@ -162,7 +192,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const users = { "d2": "D2", "d1": "D1" };
+    const users = { "d1": "Darshan", "divya@123": "Divya" };
     let currentUser = "";
 
     function login() {
@@ -210,8 +240,6 @@
       const cancelBtn = document.getElementById("cancelEditBtn");
       if (cancelBtn) cancelBtn.remove();
     }
-
-
 
     function sendMessage() {
       const msg = document.getElementById("messageInput").value.trim();
@@ -325,8 +353,6 @@ function renderMessage(data, key) {
 
   return msgDiv;
 }
-
-
 function listenToChat() {
   const chatBox = document.getElementById("chatBox");
   db.ref("chat").on("value", snapshot => {
@@ -338,7 +364,6 @@ function listenToChat() {
     chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
-
 
     function clearChat() {
       db.ref("chat").remove();
@@ -378,14 +403,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-
-
-
-
-
-
-
-
 function setUserOnlineStatus() {
   const userStatusRef = db.ref(`status/${currentUser}`);
   const connectedRef = db.ref(".info/connected");
@@ -397,8 +414,6 @@ function setUserOnlineStatus() {
     userStatusRef.set({ state: "online", lastChanged: Date.now() });
   });
 }
-
-
 function login() {
   const pw = document.getElementById("password").value;
   if (users[pw]) {
@@ -414,9 +429,6 @@ function login() {
     document.getElementById("loginError").innerText = "Wrong password!";
   }
 }
-
-
-
 function listenToStatus() {
   const statusRef = db.ref("status");
   const presenceInfo = document.getElementById("presenceInfo");
@@ -439,7 +451,6 @@ function listenToStatus() {
 
       // Show last seen ONLY if the user is offline
       if (statuses[user]?.state === "offline" && statuses[user]?.lastChanged) {
-<!--        const time = new Date(statuses[user].lastChanged).toLocaleString();-->
         const time = new Date(statuses[user].lastChanged).toLocaleString('en-US', {
           hour: 'numeric',
           minute: 'numeric',
@@ -456,10 +467,6 @@ function listenToStatus() {
     lastSeenInfo.innerText = lastSeenText.trim();
   });
 }
-
-
-
-
   </script>
 </body>
 </html>
