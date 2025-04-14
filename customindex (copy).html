@@ -6,8 +6,6 @@
   <title>D&D Chat</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.6.2/index.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/emoji-button.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
@@ -15,36 +13,44 @@
     <style>
 
     html, body {
-      height: 100%;
-      overflow: hidden;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
     }
 
+
   body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #fafafa;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+  overflow: auto;
+}
 
   #login, #chatApp {
     padding: 0px 20px 0px 20px;
   }
 
+  #chatApp {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 0 20px;
+  min-height: 100dvh;
+}
+
   #chatBox {
-    height: 50vh;
-    overflow-y: auto;
-    background: #fff;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  flex-grow: 1;
+  overflow-y: auto;
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
   .message {
     position: relative;
@@ -87,15 +93,15 @@
   }
 
   .input-group {
-    display: flex;
-    align-items: center;
-    background: #fff;
-    padding: 10px 14px;
-    border-radius: 30px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-top: auto;
-    gap: 10px;
-  }
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  gap: 10px;
+  margin-bottom: env(safe-area-inset-bottom); /* support iPhone safe area */
+}
 
   .input-group input[type="text"] {
     flex: 1;
@@ -170,16 +176,35 @@
   }
 
   @media (max-width: 600px) {
-    .input-group {
-      flex-direction: column;
-      align-items: stretch;
-      border-radius: 20px;
-    }
-
-    button, input[type="text"] {
-      width: 100%;
-    }
+  .input-group {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 20px;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 8px 10px;
   }
+
+  .input-group input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+  }
+
+  .input-group button {
+    padding: 8px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  #cancelEditBtn {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+}
+
+
 </style>
 
 
@@ -198,11 +223,6 @@
     <p id="presenceInfo" style="margin-bottom: 10px;"></p>
 <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
     <div id="chatBox"></div>
-<!--    <div class="input-group">-->
-<!--      <input type="text" id="messageInput" placeholder="Type your message">-->
-<!--      <button onclick="sendMessage()">Send</button>-->
-<!--      <button onclick="clearChat()">Clear</button>-->
-<!--    </div>-->
 
       <div class="input-group">
       <input type="text" id="messageInput" placeholder="Add a message..." />
@@ -402,9 +422,6 @@ function listenToChat() {
       db.ref("chat").remove();
     }
 
-    function toggleEmojiPicker() {
-      alert("Emoji picker will appear here (implementation placeholder).");
-    }
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("messageInput").addEventListener("keypress", function (e) {
@@ -417,24 +434,7 @@ function listenToChat() {
 
 
 
-window.addEventListener('DOMContentLoaded', () => {
-    const picker = new EmojiButton({
-      position: 'top-start',
-      theme: 'light' // or "dark"
-    });
 
-    const button = document.querySelector('#emoji-toggle');
-    const input = document.querySelector('#messageInput');
-
-    picker.on('emoji', emoji => {
-      input.value += emoji;
-      input.focus();
-    });
-
-    button.addEventListener('click', () => {
-      picker.togglePicker(button);
-    });
-  });
 
 function setUserOnlineStatus() {
   const userStatusRef = db.ref(`status/${currentUser}`);
@@ -500,6 +500,12 @@ function listenToStatus() {
     lastSeenInfo.innerText = lastSeenText.trim();
   });
 }
+      const input = document.getElementById("messageInput");
+      input.addEventListener("focus", () => {
+        setTimeout(() => {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 300); // Wait a bit for keyboard to open
+      });
   </script>
 </body>
 </html>
