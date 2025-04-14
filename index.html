@@ -9,154 +9,181 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.6.2/index.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/emoji-button.min.js"></script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+<!--Instagram CSS-->
+    <style>
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
     }
 
-    #login, #chatApp {
-      padding: 20px;
-    }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #fafafa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
 
-    #chatBox {
-      height: 50vh;
-      overflow-y: auto;
-      background: white;
-      padding: 10px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+  #login, #chatApp {
+    padding: 0px 20px 0px 20px;
+  }
 
-    .message {
-  position: relative;
-  max-width: 70%;
-  padding: 10px 14px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease-in-out;
-  word-wrap: break-word;
-  animation: fadeIn 0.3s ease;
-}
+  #chatBox {
+    height: 50vh;
+    overflow-y: auto;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.message:hover {
-  transform: scale(1.02);
-}
+  .message {
+    position: relative;
+    max-width: 70%;
+    padding: 10px 14px;
+    background-color: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease;
+  }
 
+  .message:hover {
+    transform: scale(1.02);
+  }
 
-    .menu-icon {
-      position: absolute;
-      top: 5px;
-      right: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      display: none;
-    }
+  .message.own {
+    background: #dcf8c6;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
 
-    .message:hover .menu-icon {
-      display: block;
-    }
+  .message:not(.own) {
+    background: #f1f0f0;
+    border-bottom-left-radius: 4px;
+  }
 
-    .dropdown {
-      position: absolute;
-      top: 25px;
-      right: 5px;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      z-index: 10;
-      display: none;
-      flex-direction: column;
-      min-width: 100px;
-    }
+  .sender {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+  }
 
-    .dropdown a {
-      padding: 8px 12px;
-      text-decoration: none;
-      color: #333;
-      font-size: 14px;
-      cursor: pointer;
-    }
+  .timestamp {
+    font-size: 0.75em;
+    text-align: right;
+    margin-top: 6px;
+    color: #999;
+  }
 
-    .dropdown a:hover {
-      background: #f0f0f0;
-    }
+  .input-group {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    padding: 10px 14px;
+    border-radius: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: auto;
+    gap: 10px;
+  }
 
+  .input-group input[type="text"] {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: transparent;
+  }
 
+  button {
+    background-color: #3897f0;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
 
-    .message.own {
-      background: linear-gradient(135deg, #dcf8c6, #b4eeb2);
-      align-self: flex-end;
-      border-bottom-right-radius: 0;
-    }
+  button:hover {
+    background-color: #2a7cd6;
+  }
 
-    .message:not(.own) {
-      background: linear-gradient(135deg, #f1f0f0, #e1e1e1);
-      border-bottom-left-radius: 0;
-    }
+  #cancelEditBtn {
+    background-color: #ccc !important;
+    color: #333;
+  }
 
+  .menu-icon {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: none;
+  }
 
-    .sender {
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #3b3b3b;
-    }
+  .message:hover .menu-icon {
+    display: block;
+  }
 
+  .dropdown {
+    position: absolute;
+    top: 25px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    min-width: 100px;
+  }
 
+  .dropdown a {
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
-    .timestamp {
-      font-size: 0.75em;
-      text-align: right;
-      margin-top: 6px;
-      color: #888;
-    }
+  .dropdown a:hover {
+    background: #f0f0f0;
+  }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
+  @media (max-width: 600px) {
     .input-group {
-      display: flex;
-      flex-direction: row;
-      gap: 5px;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
+      border-radius: 20px;
     }
 
-    .input-group input[type="text"] {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
+    button, input[type="text"] {
+      width: 100%;
     }
+  }
+</style>
 
-    button {
-      padding: 12px 15px;
-      font-size: 16px;
-    }
 
-    @media (max-width: 600px) {
-      .input-group {
-        flex-direction: column;
-        align-items: stretch;
-      }
 
-      button, input[type="text"] {
-        width: -webkit-fill-available;
-        font-size: 18px;
-      }
-    }
-  </style>
 </head>
 <body>
   <div id="login">
@@ -171,10 +198,16 @@
     <p id="presenceInfo" style="margin-bottom: 10px;"></p>
 <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
     <div id="chatBox"></div>
-    <div class="input-group">
-      <input type="text" id="messageInput" placeholder="Type your message">
+<!--    <div class="input-group">-->
+<!--      <input type="text" id="messageInput" placeholder="Type your message">-->
+<!--      <button onclick="sendMessage()">Send</button>-->
+<!--      <button onclick="clearChat()">Clear</button>-->
+<!--    </div>-->
+
+      <div class="input-group">
+      <input type="text" id="messageInput" placeholder="Add a message..." />
       <button onclick="sendMessage()">Send</button>
-      <button onclick="clearChat()">Clear</button>
+      <button onclick="clearChat()" style="background-color: #efefef; color: #555;">Clear</button>
     </div>
   </div>
 
