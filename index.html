@@ -12,36 +12,31 @@
 <!--Instagram CSS-->
     <style>
 
-    html, body {
-      height: 100dvh;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #fafafa;
-      display: flex;
-      flex-direction: column;
-    }
-
-
-  body {
-  overflow: auto;
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
 }
+
+
+
 
   #login, #chatApp {
     padding: 0px 20px 0px 20px;
   }
 
-  #chatApp {
+#chatApp {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  padding: 0 20px;
-  min-height: 100dvh;
+  height: 100dvh; /* Full height of the viewport */
+  overflow: hidden;
 }
 
-  #chatBox {
-  flex-grow: 1;
-  overflow-y: auto;
+#chatBox {
+  flex: 1;
   background: #fff;
   padding: 16px;
   border-radius: 12px;
@@ -50,6 +45,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: auto;
+  height: 70vh; /* 70% of viewport height for desktop */
 }
 
   .message {
@@ -202,6 +199,9 @@
     font-size: 13px;
     padding: 8px 10px;
   }
+    #chatBox {
+    height: 65vh; /* 60% of viewport height for mobile devices */
+  }
 }
 
 
@@ -226,7 +226,7 @@
 
       <div class="input-group">
       <input type="text" id="messageInput" placeholder="Add a message..." />
-      <button onclick="sendMessage()">Send</button>
+      <button type="button" onclick="sendMessage()">Send</button>
       <button onclick="clearChat()" style="background-color: #efefef; color: #555;">Clear</button>
     </div>
   </div>
@@ -245,7 +245,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const users = { "d1": "Darshan", "divya@123": "Divya" };
+    const users = { "d": "Darshan", "divya@123": "Divya" };
     let currentUser = "";
 
     function login() {
@@ -295,36 +295,43 @@
     }
 
     function sendMessage() {
-      const msg = document.getElementById("messageInput").value.trim();
-      if (!msg) return;
-      const now = new Date().toLocaleString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hour12: true,
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
+  const input = document.getElementById("messageInput");
+  const msg = input.value.trim();
+  if (!msg) return;
 
-      if (editMessageKey) {
-        db.ref("chat/" + editMessageKey).update({
-          message: msg,
-          time: now + " (edited)",
-        });
-        editMessageKey = null;
-        document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
-      } else {
-        const chatMessage = {
-          user: currentUser,
-          message: msg,
-          time: now
-        };
-        db.ref("chat").push(chatMessage);
-      }
+  // Prevent losing focus (especially on mobile)
+  input.focus();
 
-      document.getElementById("messageInput").value = "";
+  const now = new Date().toLocaleString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  if (editMessageKey) {
+    db.ref("chat/" + editMessageKey).update({
+      message: msg,
+      time: now + " (edited)",
+    });
+    editMessageKey = null;
+    document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
+  } else {
+    const chatMessage = {
+      user: currentUser,
+      message: msg,
+      time: now
+    };
+    db.ref("chat").push(chatMessage);
   }
+
+  input.value = "";
+  input.focus(); // 👈 force focus back
+}
+
 
 function renderMessage(data, key) {
   const { user, message, time } = data;
