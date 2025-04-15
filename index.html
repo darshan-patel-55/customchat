@@ -9,7 +9,6 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
-<!--Instagram CSS-->
     <style>
 
 html, body {
@@ -28,29 +27,18 @@ html, body {
     padding: 0px 20px 0px 20px;
   }
 
-#chatApp {
-  display: flex;
-  flex-direction: column-reverse;
-  height: 100dvh; /* Full height of the viewport */
-  overflow: hidden;
-}
-
-#chatBox {
-  flex: 1;
-  background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  height: 70vh; /* 70% of viewport height for desktop */
-  justify-content: end;
-}
-
-
+  #chatBox {
+    height: 50vh;
+    overflow-y: auto;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
 
 .message {
   background-color: #fff;
@@ -185,11 +173,6 @@ button {
   }
 
   @media (max-width: 600px) {
-
-  body {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
     .input-group {
     position: sticky;
     bottom: 0;
@@ -199,9 +182,6 @@ button {
     padding: 10px;
     gap: 8px;
   }
-
-
-
     .input-group input {
     font-size: 16px;
     padding: 10px;
@@ -212,12 +192,6 @@ button {
     font-size: 14px;
     flex-shrink: 0;
   }
-
-  #chatBox {
-    height: calc(100dvh - 150px);
-  }
-
-
 
   .input-group input[type="text"] {
     flex: 1;
@@ -241,11 +215,7 @@ button {
     justify-content: end;
   }
 }
-
-
 </style>
-
-
 
 </head>
 <body>
@@ -448,24 +418,22 @@ function listenToChat() {
   db.ref("chat").on("value", snapshot => {
     const chat = snapshot.val();
     chatBox.innerHTML = "";
-    for (let key in chat) {
+
+    // Get all message keys and reverse their order
+    const reversedKeys = Object.keys(chat || {}).reverse();
+
+    for (let key of reversedKeys) {
       chatBox.appendChild(renderMessage(chat[key], key));
     }
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Scroll to top (since newest messages are now at top)
+    chatBox.scrollTop = 0;
   });
-  const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
-  if (isAtBottom) {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
 }
 
     function clearChat() {
       db.ref("chat").remove();
     }
-
-
-
-
     document.addEventListener("DOMContentLoaded", () => {
       const savedUser = localStorage.getItem("currentUser");
       if (savedUser) {
@@ -574,12 +542,12 @@ function listenToStatus() {
           month: 'short',
           year: 'numeric'
         });
-        lastSeenText += `${user} was last seen: ${time}\n`;
+        lastSeenText += `${user} was last seen at ${time}<br>`;
       }
     }
 
-    presenceInfo.innerText = infoText.trim();
-    lastSeenInfo.innerText = lastSeenText.trim();
+    presenceInfo.innerHTML = infoText.trim();
+    lastSeenInfo.innerHTML = lastSeenText.trim();
   });
 }
       const input = document.getElementById("messageInput");
