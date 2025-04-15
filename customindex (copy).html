@@ -50,32 +50,43 @@ html, body {
   justify-content: end;
 }
 
-  .message {
-    position: relative;
-    max-width: 70%;
-    padding: 10px 14px;
-    background-color: #ffffff;
-    border-radius: 18px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease-in-out;
-    word-wrap: break-word;
-    animation: fadeIn 0.3s ease;
-  }
+
+
+.message {
+  background-color: #fff;
+  border-radius: 22px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  font-size: 15px;
+  max-width: 75%;
+}
 
   .message:hover {
     transform: scale(1.02);
   }
 
-  .message.own {
-    background: #dcf8c6;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-  }
+
+
+.message.own {
+  background-color: #e0f7fa;
+  align-self: flex-end;
+}
+
+
 
   .message:not(.own) {
-    background: #f1f0f0;
-    border-bottom-left-radius: 4px;
-  }
+  background-color: #f5f5f5;
+}
+
+button {
+  background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 14px;
+}
 
   .sender {
     font-weight: 600;
@@ -179,15 +190,34 @@ html, body {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-
-  .input-group {
-    flex-direction: row;
-    align-items: center;
-    border-radius: 20px;
-    flex-wrap: nowrap;
-    gap: 6px;
-    padding: 8px 10px;
+    .input-group {
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    background: #fff;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    gap: 8px;
   }
+
+
+
+    .input-group input {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+    button {
+    padding: 10px 14px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  #chatBox {
+    height: calc(100dvh - 150px);
+  }
+
+
 
   .input-group input[type="text"] {
     flex: 1;
@@ -227,15 +257,18 @@ html, body {
   </div>
 
   <div id="chatApp" style="display:none; flex-grow: 1;">
-    <h3>Welcome, <span id="userName"></span></h3>
+    <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
+      <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
+</h3>
     <p id="presenceInfo" style="margin-bottom: 10px;"></p>
-<div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
+    <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
+
     <div id="chatBox"></div>
 
       <div class="input-group">
       <input type="text" id="messageInput" placeholder="Add a message..." />
       <button type="button" onclick="sendMessage()">Send</button>
-      <button onclick="clearChat()" style="background-color: #efefef; color: #555;">Clear</button>
+      <button onclick="clearChat()" style="background-color: #efefef; color: #FFFF;">Clear</button>
     </div>
   </div>
 
@@ -274,6 +307,7 @@ html, body {
         cancelBtn.innerText = "Cancel";
         cancelBtn.style.backgroundColor = "#ccc";
         cancelBtn.style.marginLeft = "5px";
+        cancelBtn.style.color = "#FFFF";
         cancelBtn.onclick = cancelEdit;
         sendBtn.parentNode.appendChild(cancelBtn);
       }
@@ -430,6 +464,31 @@ function listenToChat() {
     }
 
 
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedUser = localStorage.getItem("currentUser");
+      if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById("userName").innerText = currentUser;
+        document.getElementById("login").style.display = "none";
+        document.getElementById("chatApp").style.display = "block";
+
+        setUserOnlineStatus();
+        listenToChat();
+        listenToStatus();
+      }
+
+      document.getElementById("messageInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      document.getElementById("password").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") login();
+      });
+    });
+
+
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("messageInput").addEventListener("keypress", function (e) {
         if (e.key === "Enter") sendMessage();
@@ -454,21 +513,37 @@ function setUserOnlineStatus() {
     userStatusRef.set({ state: "online", lastChanged: Date.now() });
   });
 }
+
+function logout() {
+  localStorage.removeItem("currentUser");
+  db.ref(`status/${currentUser}`).set({ state: "offline", lastChanged: Date.now() });
+  currentUser = "";
+  document.getElementById("chatApp").style.display = "none";
+  document.getElementById("login").style.display = "block";
+  document.getElementById("password").value = "";
+}
+
+
 function login() {
   const pw = document.getElementById("password").value;
   if (users[pw]) {
     currentUser = users[pw];
+    localStorage.setItem("currentUser", currentUser); // Save to localStorage
+
     document.getElementById("userName").innerText = currentUser;
     document.getElementById("login").style.display = "none";
     document.getElementById("chatApp").style.display = "block";
 
-    setUserOnlineStatus();       // 👈 Setup presence
-    listenToChat();              // 👈 Start chat listener
-    listenToStatus();            // 👈 Start presence UI
+    setUserOnlineStatus();
+    listenToChat();
+    listenToStatus();
   } else {
     document.getElementById("loginError").innerText = "Wrong password!";
   }
 }
+
+
+
 function listenToStatus() {
   const statusRef = db.ref("status");
   const presenceInfo = document.getElementById("presenceInfo");
