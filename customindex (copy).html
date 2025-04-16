@@ -67,7 +67,7 @@ html, body {
 }
 
 button {
-  background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+<!--  background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);-->
   color: white;
   border: none;
   padding: 10px 14px;
@@ -109,7 +109,7 @@ button {
   }
 
   button {
-    background-color: #3897f0;
+    background-color: #3897f0 !important;
     color: white;
     border: none;
     padding: 10px 16px;
@@ -243,6 +243,29 @@ button {
   </div>
 
   <script>
+
+
+    let logoutTimer;
+    function resetLogoutTimer() {
+      clearTimeout(logoutTimer);
+      logoutTimer = setTimeout(autoLogout, 60000); // 60 seconds
+    }
+
+    function autoLogout() {
+      logout();
+    }
+
+    const activityEvents = ['keydown', 'mousemove', 'mousedown', 'touchstart', 'scroll'];
+
+    activityEvents.forEach(event => {
+      window.addEventListener(event, resetLogoutTimer, true);
+    });
+    resetLogoutTimer();
+
+
+
+
+
     const firebaseConfig = {
       apiKey: "AIzaSyDFP_dLmK45O0FP_I_5U1CNf30Yj7LT6i8",
       authDomain: "mychatapp-1f010.firebaseapp.com",
@@ -489,6 +512,7 @@ function logout() {
   document.getElementById("chatApp").style.display = "none";
   document.getElementById("login").style.display = "block";
   document.getElementById("password").value = "";
+  location.replace('https://www.google.in');
 }
 
 
