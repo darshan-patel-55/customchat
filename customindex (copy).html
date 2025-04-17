@@ -28,7 +28,7 @@ html, body {
   }
 
   #chatBox {
-    height: 50vh;
+    height: 75vh;
     overflow-y: auto;
     background: #fff;
     padding: 16px;
@@ -243,29 +243,6 @@ button {
   </div>
 
   <script>
-
-
-    let logoutTimer;
-    function resetLogoutTimer() {
-      clearTimeout(logoutTimer);
-      logoutTimer = setTimeout(autoLogout, 60000); // 60 seconds
-    }
-
-    function autoLogout() {
-      logout();
-      window.close();
-    }
-
-    const activityEvents = ['keydown', 'mousemove', 'mousedown', 'touchstart', 'scroll'];
-
-    activityEvents.forEach(event => {
-      window.addEventListener(event, resetLogoutTimer, true);
-    });
-    resetLogoutTimer();
-
-
-
-
 
     const firebaseConfig = {
       apiKey: "AIzaSyDFP_dLmK45O0FP_I_5U1CNf30Yj7LT6i8",
