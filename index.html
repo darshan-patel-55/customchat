@@ -467,29 +467,28 @@
     }
   }
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('beforeinstallprompt event fired');
-    e.preventDefault();
-    deferredPrompt = e;
-    showInstallPromotion();
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installContainer').style.display = 'block';
 
-    // Optional: Log PWA installability
-    if ('getInstalledRelatedApps' in window.navigator) {
-      navigator.getInstalledRelatedApps().then(apps => {
-        console.log('Installed related apps:', apps);
-      });
-    }
-  });
+  // For debugging:
+  console.log('Install prompt ready');
+});
 
-  installButton.addEventListener('click', async () => {
-    installContainer.style.display = 'none';
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
-      deferredPrompt = null;
-    }
-  });
+  document.getElementById('installButton').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+
+  console.log(`User ${outcome} the install`);
+  if (outcome === 'accepted') {
+    // Hide the install button
+    document.getElementById('installContainer').style.display = 'none';
+  }
+  deferredPrompt = null;
+});
 
   dismissButton.addEventListener('click', () => {
     installContainer.style.display = 'none';
