@@ -10,6 +10,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
+        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
@@ -23,30 +24,10 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
-
-        // Clone the request
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
-      })
-    );
+        return fetch(event.request);
+      }
+    )
+  );
 });
 
 self.addEventListener('activate', event => {
@@ -61,5 +42,46 @@ self.addEventListener('activate', event => {
         })
       );
     })
+  );
+});
+
+
+
+
+
+
+
+
+
+
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.match(event.request)
+      .then(cached => {
+        const networked = fetch(event.request)
+          .then(fetchedFromNetwork, unableToResolve)
+          .catch(unableToResolve);
+
+        return cached || networked;
+
+        function fetchedFromNetwork(response) {
+          const cacheCopy = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(event.request, cacheCopy));
+          return response;
+        }
+
+        function unableToResolve() {
+          return new Response('<h1>Service Unavailable</h1><p>You are offline. Some features may not be available.</p>', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+              'Content-Type': 'text/html'
+            })
+          });
+        }
+      })
   );
 });
