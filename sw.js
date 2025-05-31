@@ -1,8 +1,8 @@
 const CACHE_NAME = 'dnd-chat-v1';
 const ASSETS_TO_CACHE = [
-  '/index.html',
-  '/manifest.json',
-  '/favicon.ico'
+  '/customchat/index.html',
+  '/customchat/manifest.json',
+  '/customchat/favicon.ico'
 ];
 
 // Install Service Worker & Cache Files
