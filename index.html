@@ -471,6 +471,7 @@
         document.getElementById('calculator').classList.add('hidden');
         document.getElementById('login').classList.remove('hidden');
         document.getElementById("login").style.display = "block";
+        document.getElementById("password").focus();
         localStorage.setItem("passedCalculator", "true");
         return;
       }
@@ -726,7 +727,6 @@
   }
 
     function login() {
-      debugger
       const pw = document.getElementById("password").value;
       if (users[pw]) {
         currentUser = users[pw];
@@ -736,6 +736,7 @@
         document.getElementById("login").style.display = "none";
         document.getElementById('chatApp').classList.remove('hidden');
         document.getElementById("chatApp").style.display = "block";
+        document.getElementById("messageInput").focus();
 
         setUserOnlineStatus();
         listenToChat();
