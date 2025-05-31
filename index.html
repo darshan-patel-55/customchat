@@ -377,7 +377,8 @@
   </div>
 
   <script>
-    // Calculator Functions
+
+ // Calculator Functions
     function appendToDisplay(value) {
       document.getElementById('calcDisplay').value += value;
     }
@@ -453,56 +454,73 @@
 
     // PWA Initialization
     function initPWA() {
-      // Handle install prompt
-      let deferredPrompt;
-      const installContainer = document.getElementById('installContainer');
-      const installButton = document.getElementById('installButton');
-      const dismissButton = document.getElementById('dismissButton');
+  // Handle install prompt
+  let deferredPrompt;
+  const installContainer = document.getElementById('installContainer');
+  const installButton = document.getElementById('installButton');
+  const dismissButton = document.getElementById('dismissButton');
 
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installContainer.style.display = 'block';
-      });
-
-      installButton.addEventListener('click', () => {
-        installContainer.style.display = 'none';
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted install');
-          } else {
-            console.log('User dismissed install');
-          }
-          deferredPrompt = null;
-        });
-      });
-
-      dismissButton.addEventListener('click', () => {
-        installContainer.style.display = 'none';
-      });
-
-      // Check if app is running in standalone mode
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-        console.log('Running in standalone mode');
-      }
-
-      // Register service worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('ServiceWorker registration successful');
-          }).catch(err => {
-            console.log('ServiceWorker registration failed: ', err);
-          });
-        });
-      }
-
-      // Request notification permission
-      if ('Notification' in window) {
-        Notification.requestPermission();
-      }
+  // Only show install prompt if not already in standalone mode
+  function showInstallPromotion() {
+    if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+      installContainer.style.display = 'block';
     }
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired');
+    e.preventDefault();
+    deferredPrompt = e;
+    showInstallPromotion();
+
+    // Optional: Log PWA installability
+    if ('getInstalledRelatedApps' in window.navigator) {
+      navigator.getInstalledRelatedApps().then(apps => {
+        console.log('Installed related apps:', apps);
+      });
+    }
+  });
+
+  installButton.addEventListener('click', async () => {
+    installContainer.style.display = 'none';
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      deferredPrompt = null;
+    }
+  });
+
+  dismissButton.addEventListener('click', () => {
+    installContainer.style.display = 'none';
+  });
+
+  // Check if app is installed
+  window.addEventListener('appinstalled', () => {
+    console.log('PWA was installed');
+    installContainer.style.display = 'none';
+  });
+
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('ServiceWorker registration successful:', registration);
+
+        // Check if there's an update available
+        registration.addEventListener('updatefound', () => {
+          console.log('Service worker update found');
+        });
+      } catch (err) {
+        console.log('ServiceWorker registration failed: ', err);
+      }
+    });
+  }
+
+  // Check periodically if we should show install prompt
+  setTimeout(showInstallPromotion, 5000);
+}
 
     // Rest of your existing functions...
     function startEditMessage(key, oldMessage) {
@@ -770,6 +788,7 @@
         input.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 300);
     });
+
   </script>
 </body>
 </html>
