@@ -1,242 +1,373 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>D&D Chat</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="icon" type="image/x-icon" href="/customchat/favicon.ico">
+  <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
-    <style>
-
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #fafafa;
-  display: flex;
-  flex-direction: column;
-}
-
+  <link rel="manifest" href="/customchat/manifest.json">
+  <!-- For iOS support (optional) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Calculator">
+  <link rel="apple-touch-icon" href="/customchat/favicon.ico">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
-
-  #login, #chatApp {
-    padding: 0px 20px 0px 20px;
-  }
-
-  #chatBox {
-    height: 75vh;
-    overflow-y: auto;
-    background: #fff;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 10px;
-  }
-
-.message {
-  background-color: #fff;
-  border-radius: 22px;
-  padding: 10px 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-  font-size: 15px;
-  max-width: 75%;
-}
-
-  .message:hover {
-    transform: scale(1.02);
-  }
-
-
-
-.message.own {
-  background-color: #e0f7fa;
-  align-self: flex-end;
-}
-
-
-
-  .message:not(.own) {
-  background-color: #f5f5f5;
-}
-
-button {
-<!--  background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);-->
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 20px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-  .sender {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #333;
-  }
-
-  .timestamp {
-    font-size: 0.75em;
-    text-align: right;
-    margin-top: 6px;
-    color: #999;
-  }
-
-  .input-group {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  padding: 10px 14px;
-  border-radius: 30px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  gap: 10px;
-  margin-bottom: env(safe-area-inset-bottom); /* support iPhone safe area */
-}
-
-  .input-group input[type="text"] {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    background: transparent;
-  }
-
-  button {
-    background-color: #3897f0 !important;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-
-  button:hover {
-    background-color: #2a7cd6;
-  }
-
-  #cancelEditBtn {
-    background-color: #ccc !important;
-    color: #333;
-  }
-
-  .menu-icon {
-    position: absolute;
-    top: 5px;
-    right: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    display: none;
-  }
-
-  .message:hover .menu-icon {
-    display: block;
-  }
-
-  .dropdown {
-    position: absolute;
-    top: 25px;
-    right: 5px;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 10;
-    display: none;
-    flex-direction: column;
-    min-width: 100px;
-  }
-
-  .dropdown a {
-    padding: 8px 12px;
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  .dropdown a:hover {
+  <style>
+    /* Android-like Calculator Styles */
+  #calculator {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
     background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+  #calcDisplay {
+    width: calc(100% - 40px);
+    height: 120px;
+    margin: 20px;
+    padding: 0 10px;
+    text-align: right;
+    font-size: 48px;
+    background: transparent;
+    border: none;
+    color: #000;
+    font-weight: 300;
   }
 
-  @media (max-width: 600px) {
-    .input-group {
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-    background: #fff;
-    border-top: 1px solid #ddd;
-    padding: 10px;
+  .calcButtons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-  }
-    .input-group input {
-    font-size: 16px;
     padding: 10px;
+    background: #f0f0f0;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
   }
+
+  .calcBtn {
+    height: 70px;
+    border-radius: 35px;
+    font-size: 28px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    background: #f9f9f9;
+    color: #000;
+  }
+  .calcBtn.backspace {
+    font-size: 24px;
+    background: #a5a5a5;
+    color: #000;
+  }
+
+  .calcBtn:active {
+    transform: scale(0.95);
+  }
+
+  .calcBtn.operator {
+    background: #ff9500;
+    color: white;
+  }
+
+  .calcBtn.equals {
+    background: #ff9500;
+    color: white;
+  }
+
+  .calcBtn.clear {
+    background: #a5a5a5;
+    color: #000;
+  }
+
+  /* Make the 0 button span 2 columns */
+  .calcButtons button:nth-child(15) {
+    grid-column: span 2;
+  }
+
+  /* Media query for smaller screens */
+  @media (max-width: 400px) {
+    .calcBtn {
+      height: 60px;
+      font-size: 24px;
+    }
+
+    #calcDisplay {
+      font-size: 42px;
+      height: 100px;
+    }
+  }
+
+
+    /* Existing Styles */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #login, #chatApp {
+      padding: 0px 20px 0px 20px;
+    }
+
+    #chatBox {
+      height: 75vh;
+      overflow-y: auto;
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
+
+    .message {
+      background-color: #fff;
+      border-radius: 22px;
+      padding: 10px 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      font-size: 15px;
+      max-width: 75%;
+    }
+
+    .message:hover {
+      transform: scale(1.02);
+    }
+
+    .message.own {
+      background-color: #e0f7fa;
+      align-self: flex-end;
+    }
+
+    .message:not(.own) {
+      background-color: #f5f5f5;
+    }
 
     button {
-    padding: 10px 14px;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 14px;
+    }
 
-  .input-group input[type="text"] {
-    flex: 1;
-    min-width: 0;
-    font-size: 15px;
-  }
+    .sender {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #333;
+    }
 
-  .input-group button {
-    padding: 8px 10px;
-    font-size: 13px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+    .timestamp {
+      font-size: 0.75em;
+      text-align: right;
+      margin-top: 6px;
+      color: #999;
+    }
 
-  #cancelEditBtn {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-    #chatBox {
-    height: 65vh; /* 60% of viewport height for mobile devices */
-    justify-content: end;
-  }
-}
-</style>
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      gap: 10px;
+      margin-bottom: env(safe-area-inset-bottom);
+    }
 
+    .input-group input[type="text"] {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      background: transparent;
+    }
+
+    button {
+      background-color: #3897f0 !important;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2a7cd6;
+    }
+
+    #cancelEditBtn {
+      background-color: #ccc !important;
+      color: #333;
+    }
+
+    .menu-icon {
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .message:hover .menu-icon {
+      display: block;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 25px;
+      right: 5px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+      min-width: 100px;
+    }
+
+    .dropdown a {
+      padding: 8px 12px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .dropdown a:hover {
+      background: #f0f0f0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .input-group {
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        background: #fff;
+        border-top: 1px solid #ddd;
+        padding: 10px;
+        gap: 8px;
+      }
+      .input-group input {
+        font-size: 16px;
+        padding: 10px;
+      }
+
+      button {
+        padding: 10px 14px;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      .input-group input[type="text"] {
+        flex: 1;
+        min-width: 0;
+        font-size: 15px;
+      }
+
+      .input-group button {
+        padding: 8px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      #cancelEditBtn {
+        font-size: 13px;
+        padding: 8px 10px;
+      }
+      #chatBox {
+        height: 65vh;
+        justify-content: end;
+      }
+    }
+
+    /* Hidden class for screens */
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-  <div id="login">
+  <!-- Calculator Screen (shown first) -->
+  <div id="calculator">
+    <input type="text" id="calcDisplay" readonly>
+    <div class="calcButtons">
+      <button class="calcBtn clear" onclick="clearDisplay()">C</button>
+     <button class="calcBtn clear" onclick="backspace()">
+      <span class="material-icons" style="font-size: 28px;">backspace</span>
+    </button>
+      <button class="calcBtn operator" onclick="appendToDisplay('/')">÷</button>
+      <button class="calcBtn operator" onclick="appendToDisplay('*')">×</button>
+      <button class="calcBtn" onclick="appendToDisplay('7')">7</button>
+      <button class="calcBtn" onclick="appendToDisplay('8')">8</button>
+      <button class="calcBtn" onclick="appendToDisplay('9')">9</button>
+      <button class="calcBtn operator" onclick="appendToDisplay('-')">-</button>
+      <button class="calcBtn" onclick="appendToDisplay('4')">4</button>
+      <button class="calcBtn" onclick="appendToDisplay('5')">5</button>
+      <button class="calcBtn" onclick="appendToDisplay('6')">6</button>
+      <button class="calcBtn operator" onclick="appendToDisplay('+')" style="grid-row: span 2; height: auto;">+</button>
+      <button class="calcBtn" onclick="appendToDisplay('1')">1</button>
+      <button class="calcBtn" onclick="appendToDisplay('2')">2</button>
+      <button class="calcBtn" onclick="appendToDisplay('3')">3</button>
+      <button class="calcBtn" onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
+      <button class="calcBtn" onclick="appendToDisplay('.')">.</button>
+      <button class="calcBtn equals" onclick="checkSecretCode()">=</button>
+    </div>
+  </div>
+
+  <!-- Login Screen (hidden initially) -->
+  <div id="login" class="hidden">
     <h2>Login</h2>
     <input type="password" id="password" placeholder="Enter password" style="width: -webkit-fill-available; padding: 12px; font-size: 16px;">
     <button onclick="login()" style="margin-top: 10px; width: 100%; font-size: 16px;">Login</button>
     <p id="loginError" style="color:red;"></p>
   </div>
 
-  <div id="chatApp" style="display:none; flex-grow: 1;">
+  <!-- Chat App (hidden initially) -->
+  <div id="chatApp" class="hidden" style="flex-grow: 1;">
     <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
       <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
-</h3>
+    </h3>
     <p id="presenceInfo" style="margin-bottom: 10px;"></p>
     <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
 
     <div id="chatBox"></div>
 
-      <div class="input-group">
+    <div class="input-group">
       <input type="text" id="messageInput" placeholder="Add a message..." />
       <button type="button" onclick="sendMessage()">Send</button>
       <button onclick="clearChat()" style="background-color: #efefef; color: #FFFF;">Clear</button>
@@ -245,6 +376,50 @@ button {
 
   <script>
 
+// PWA serviceWorker
+
+  if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/customchat/sw.js")
+      .then(reg => console.log("✅ Service Worker Registered"))
+      .catch(err => console.log("❌ Service Worker Failed:", err));
+  });
+}
+
+// PWA serviceWorker
+
+
+
+    // Calculator Functions
+
+    function backspace() {
+      const display = document.getElementById('calcDisplay');
+      display.value = display.value.toString().slice(0, -1);
+    }
+    function appendToDisplay(value) {
+      document.getElementById('calcDisplay').value += value;
+    }
+
+    function clearDisplay() {
+      document.getElementById('calcDisplay').value = '';
+    }
+
+    function checkSecretCode() {
+      debugger
+      const display = document.getElementById('calcDisplay');
+      const secretCode = "1989"; // Change this to your desired secret code
+
+      if (display.value.endsWith(secretCode)) {
+        document.getElementById('calculator').classList.add('hidden');
+        document.getElementById('login').classList.remove('hidden');
+        document.getElementById("login").style.display = "block";
+        localStorage.setItem("passedCalculator", "true");
+      } else {
+        clearDisplay();
+      }
+    }
+
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDFP_dLmK45O0FP_I_5U1CNf30Yj7LT6i8",
       authDomain: "mychatapp-1f010.firebaseapp.com",
@@ -260,10 +435,38 @@ button {
 
     const users = { "d": "Darshan", "divya@123": "Divya" };
     let currentUser = "";
-
-
     let editMessageKey = null;
 
+    // Check if user already passed calculator screen
+    document.addEventListener("DOMContentLoaded", () => {
+      const passedCalculator = localStorage.getItem("passedCalculator");
+      if (passedCalculator) {
+        document.getElementById('calculator').classList.add('hidden');
+        document.getElementById('login').classList.remove('hidden');
+      }
+
+      const savedUser = localStorage.getItem("currentUser");
+      if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById("userName").innerText = currentUser;
+        document.getElementById("login").style.display = "none";
+        document.getElementById("chatApp").style.display = "block";
+
+        setUserOnlineStatus();
+        listenToChat();
+        listenToStatus();
+      }
+
+      document.getElementById("messageInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      document.getElementById("password").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") login();
+      });
+    });
+
+    // Rest of your existing functions remain the same...
     function startEditMessage(key, oldMessage) {
       document.getElementById("messageInput").value = oldMessage;
       editMessageKey = key;
@@ -271,7 +474,6 @@ button {
       const sendBtn = document.querySelector("button[onclick='sendMessage()']");
       sendBtn.innerText = "Update";
 
-      // Show cancel button
       let cancelBtn = document.getElementById("cancelEditBtn");
       if (!cancelBtn) {
         cancelBtn = document.createElement("button");
@@ -297,273 +499,226 @@ button {
     }
 
     function sendMessage() {
-  const input = document.getElementById("messageInput");
-  const msg = input.value.trim();
-  if (!msg) return;
+      const input = document.getElementById("messageInput");
+      const msg = input.value.trim();
+      if (!msg) return;
 
-  // Prevent losing focus (especially on mobile)
-  input.focus();
+      input.focus();
 
-  const now = new Date().toLocaleString('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: true,
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+      const now = new Date().toLocaleString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
 
-  if (editMessageKey) {
-    db.ref("chat/" + editMessageKey).update({
-      message: msg,
-      time: now + " (edited)",
-    });
-    editMessageKey = null;
-    document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
-  } else {
-    const chatMessage = {
-      user: currentUser,
-      message: msg,
-      time: now
-    };
-    db.ref("chat").push(chatMessage);
-  }
+      if (editMessageKey) {
+        db.ref("chat/" + editMessageKey).update({
+          message: msg,
+          time: now + " (edited)",
+        });
+        editMessageKey = null;
+        document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
+      } else {
+        const chatMessage = {
+          user: currentUser,
+          message: msg,
+          time: now
+        };
+        db.ref("chat").push(chatMessage);
+      }
 
-  input.value = "";
-  input.focus(); // 👈 force focus back
-}
-
-
-function renderMessage(data, key) {
-  const { user, message, time } = data;
-  const isCurrent = user === currentUser;
-
-  const msgDiv = document.createElement("div");
-  msgDiv.className = "message" + (isCurrent ? " own" : "");
-
-  const nameDiv = document.createElement("div");
-  nameDiv.className = "sender";
-  nameDiv.innerText = user;
-
-  const msgText = document.createElement("div");
-  msgText.innerText = message;
-  msgText.className = "msgText";
-
-  const timeDiv = document.createElement("div");
-  timeDiv.className = "timestamp";
-  timeDiv.innerText = time;
-
-  // Optional formatting: make "(edited)" italic and gray
-    if (time.includes("(edited)")) {
-      const parts = time.split("(edited)");
-      timeDiv.innerHTML = `${parts[0]} <span style="font-style:italic; color:gray;">(edited)</span>`;
-    } else {
-      timeDiv.innerText = time;
+      input.value = "";
+      input.focus();
     }
 
-  msgDiv.appendChild(nameDiv);
-  msgDiv.appendChild(msgText);
-  msgDiv.appendChild(timeDiv);
+    function renderMessage(data, key) {
+      const { user, message, time } = data;
+      const isCurrent = user === currentUser;
 
-  // Add Edit button
-  if (isCurrent) {
-  // ⋮ Menu icon
-  const menuIcon = document.createElement("div");
-  menuIcon.className = "menu-icon";
-  menuIcon.innerText = "⋮";
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "message" + (isCurrent ? " own" : "");
 
-  // Dropdown menu
-  const dropdown = document.createElement("div");
-  dropdown.className = "dropdown";
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "sender";
+      nameDiv.innerText = user;
 
-  // Edit option
-  const editOption = document.createElement("a");
-  editOption.innerText = "Edit";
-  editOption.onclick = () => {
-    startEditMessage(key, message);
-    dropdown.style.display = "none";
-  };
+      const msgText = document.createElement("div");
+      msgText.innerText = message;
+      msgText.className = "msgText";
 
-  // Delete option
-  const deleteOption = document.createElement("a");
-  deleteOption.innerText = "Delete";
-  deleteOption.onclick = () => {
-    if (confirm("Are you sure you want to delete this message?")) {
-      db.ref("chat/" + key).remove();
+      const timeDiv = document.createElement("div");
+      timeDiv.className = "timestamp";
+
+      if (time.includes("(edited)")) {
+        const parts = time.split("(edited)");
+        timeDiv.innerHTML = `${parts[0]} <span style="font-style:italic; color:gray;">(edited)</span>`;
+      } else {
+        timeDiv.innerText = time;
+      }
+
+      msgDiv.appendChild(nameDiv);
+      msgDiv.appendChild(msgText);
+      msgDiv.appendChild(timeDiv);
+
+      if (isCurrent) {
+        const menuIcon = document.createElement("div");
+        menuIcon.className = "menu-icon";
+        menuIcon.innerText = "⋮";
+
+        const dropdown = document.createElement("div");
+        dropdown.className = "dropdown";
+
+        const editOption = document.createElement("a");
+        editOption.innerText = "Edit";
+        editOption.onclick = () => {
+          startEditMessage(key, message);
+          dropdown.style.display = "none";
+        };
+
+        const deleteOption = document.createElement("a");
+        deleteOption.innerText = "Delete";
+        deleteOption.onclick = () => {
+          if (confirm("Are you sure you want to delete this message?")) {
+            db.ref("chat/" + key).remove();
+          }
+          dropdown.style.display = "none";
+        };
+
+        dropdown.appendChild(editOption);
+        dropdown.appendChild(deleteOption);
+        msgDiv.appendChild(menuIcon);
+        msgDiv.appendChild(dropdown);
+
+        menuIcon.onclick = (e) => {
+          e.stopPropagation();
+          dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+        };
+
+        document.addEventListener("click", () => {
+          dropdown.style.display = "none";
+        }, { once: true });
+      }
+
+      return msgDiv;
     }
-    dropdown.style.display = "none";
-  };
 
-  // Append options
-  dropdown.appendChild(editOption);
-  dropdown.appendChild(deleteOption);
-  msgDiv.appendChild(menuIcon);
-  msgDiv.appendChild(dropdown);
+    function listenToChat() {
+      const chatBox = document.getElementById("chatBox");
+      db.ref("chat").on("value", snapshot => {
+        const chat = snapshot.val();
+        chatBox.innerHTML = "";
 
-  // Toggle dropdown visibility
-  menuIcon.onclick = (e) => {
-    e.stopPropagation();
-    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
-  };
+        const reversedKeys = Object.keys(chat || {}).reverse();
 
-  // Hide dropdown on outside click
-  document.addEventListener("click", () => {
-    dropdown.style.display = "none";
-  }, { once: true });
-}
+        for (let key of reversedKeys) {
+          chatBox.appendChild(renderMessage(chat[key], key));
+        }
 
-  return msgDiv;
-}
-function listenToChat() {
-  const chatBox = document.getElementById("chatBox");
-  db.ref("chat").on("value", snapshot => {
-    const chat = snapshot.val();
-    chatBox.innerHTML = "";
-
-    // Get all message keys and reverse their order
-    const reversedKeys = Object.keys(chat || {}).reverse();
-
-    for (let key of reversedKeys) {
-      chatBox.appendChild(renderMessage(chat[key], key));
+        chatBox.scrollTop = 0;
+      });
     }
-
-    // Scroll to top (since newest messages are now at top)
-    chatBox.scrollTop = 0;
-  });
-}
 
     function clearChat() {
       db.ref("chat").remove();
     }
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedUser = localStorage.getItem("currentUser");
-      if (savedUser) {
-        currentUser = savedUser;
+
+    function setUserOnlineStatus() {
+      const userStatusRef = db.ref(`status/${currentUser}`);
+      const connectedRef = db.ref(".info/connected");
+
+      connectedRef.on("value", (snap) => {
+        if (snap.val() === false) return;
+
+        userStatusRef.onDisconnect().set({ state: "offline", lastChanged: Date.now() });
+        userStatusRef.set({ state: "online", lastChanged: Date.now() });
+      });
+    }
+
+    function logout() {
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("passedCalculator");
+    db.ref(`status/${currentUser}`).set({ state: "offline", lastChanged: Date.now() });
+    currentUser = "";
+    document.getElementById("chatApp").style.display = "none";
+<!--    document.getElementById("login").style.display = "block";-->
+    document.getElementById("calculator").style.display = "block";
+    document.getElementById("password").value = "";
+    location.replace('https://www.google.in');
+  }
+
+    function login() {
+      debugger
+      const pw = document.getElementById("password").value;
+      if (users[pw]) {
+        currentUser = users[pw];
+        localStorage.setItem("currentUser", currentUser);
+
         document.getElementById("userName").innerText = currentUser;
         document.getElementById("login").style.display = "none";
+        document.getElementById('chatApp').classList.remove('hidden');
         document.getElementById("chatApp").style.display = "block";
 
         setUserOnlineStatus();
         listenToChat();
         listenToStatus();
-      }
-
-      document.getElementById("messageInput").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") sendMessage();
-      });
-
-      document.getElementById("password").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") login();
-      });
-    });
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("messageInput").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") sendMessage();
-      });
-      document.getElementById("password").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") login();
-      });
-    });
-
-
-
-
-
-function setUserOnlineStatus() {
-  const userStatusRef = db.ref(`status/${currentUser}`);
-  const connectedRef = db.ref(".info/connected");
-
-  connectedRef.on("value", (snap) => {
-    if (snap.val() === false) return;
-
-    userStatusRef.onDisconnect().set({ state: "offline", lastChanged: Date.now() });
-    userStatusRef.set({ state: "online", lastChanged: Date.now() });
-  });
-}
-
-function logout() {
-  localStorage.removeItem("currentUser");
-  db.ref(`status/${currentUser}`).set({ state: "offline", lastChanged: Date.now() });
-  currentUser = "";
-  document.getElementById("chatApp").style.display = "none";
-  document.getElementById("login").style.display = "block";
-  document.getElementById("password").value = "";
-  location.replace('https://www.google.in');
-}
-
-
-function login() {
-  const pw = document.getElementById("password").value;
-  if (users[pw]) {
-    currentUser = users[pw];
-    localStorage.setItem("currentUser", currentUser); // Save to localStorage
-
-    document.getElementById("userName").innerText = currentUser;
-    document.getElementById("login").style.display = "none";
-    document.getElementById("chatApp").style.display = "block";
-
-    setUserOnlineStatus();
-    listenToChat();
-    listenToStatus();
-  } else {
-    document.getElementById("loginError").innerText = "Wrong password!";
-  }
-}
-
-
-
-function listenToStatus() {
-  const statusRef = db.ref("status");
-  const presenceInfo = document.getElementById("presenceInfo");
-  const lastSeenInfo = document.getElementById("lastSeenInfo");
-
-  statusRef.on("value", (snapshot) => {
-    const statuses = snapshot.val() || {};
-    let infoText = "";
-    let lastSeenText = "";
-
-    for (const user of Object.values(users)) {
-      if (user === currentUser) {
-        const state = statuses[user]?.state === "online" ? "🟢" : "🟡";
-        document.getElementById("userName").innerText = `${user} ${state}`;
-        continue;
-      }
-
-      const state = statuses[user]?.state === "online" ? "Online 🟢" : "Offline 🟡";
-      infoText += `${user} is ${state}  `;
-
-      // Show last seen ONLY if the user is offline
-      if (statuses[user]?.state === "offline" && statuses[user]?.lastChanged) {
-        const time = new Date(statuses[user].lastChanged).toLocaleString('en-US', {
-          hour: 'numeric',
-          minute: 'numeric',
-          hour12: true,
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
-        });
-        lastSeenText += `${user} was last seen at ${time}<br>`;
+      } else {
+        document.getElementById("loginError").innerText = "Wrong password!";
       }
     }
 
-    presenceInfo.innerHTML = infoText.trim();
-    lastSeenInfo.innerHTML = lastSeenText.trim();
-  });
-}
-      const input = document.getElementById("messageInput");
-      input.addEventListener("focus", () => {
-        setTimeout(() => {
-          input.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 300); // Wait a bit for keyboard to open
+    function listenToStatus() {
+      const statusRef = db.ref("status");
+      const presenceInfo = document.getElementById("presenceInfo");
+      const lastSeenInfo = document.getElementById("lastSeenInfo");
+
+      statusRef.on("value", (snapshot) => {
+        const statuses = snapshot.val() || {};
+        let infoText = "";
+        let lastSeenText = "";
+
+        for (const user of Object.values(users)) {
+          if (user === currentUser) {
+            const state = statuses[user]?.state === "online" ? "🟢" : "🟡";
+            document.getElementById("userName").innerText = `${user} ${state}`;
+            continue;
+          }
+
+          const state = statuses[user]?.state === "online" ? "Online 🟢" : "Offline 🟡";
+          infoText += `${user} is ${state}  `;
+
+          if (statuses[user]?.state === "offline" && statuses[user]?.lastChanged) {
+            const time = new Date(statuses[user].lastChanged).toLocaleString('en-US', {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true,
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            });
+            lastSeenText += `${user} was last seen at ${time}<br>`;
+          }
+        }
+
+        presenceInfo.innerHTML = infoText.trim();
+        lastSeenInfo.innerHTML = lastSeenText.trim();
       });
-      input.addEventListener("click", () => {
-        setTimeout(() => {
-          input.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 300); // Wait a bit for keyboard to open
-      });
+    }
+
+    const input = document.getElementById("messageInput");
+    input.addEventListener("focus", () => {
+      setTimeout(() => {
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    });
+    input.addEventListener("click", () => {
+      setTimeout(() => {
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    });
   </script>
 </body>
 </html>
