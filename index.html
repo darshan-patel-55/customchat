@@ -370,7 +370,8 @@
       <button class="calcBtn orange" onclick="backspace()">
         <span class="material-icons">backspace</span>
       </button>
-      <button class="calcBtn orange equals" onclick="checkSecretCode()">=</button>
+<!--      <button class="calcBtn orange equals" onclick="checkSecretCode()">=</button>-->
+      <button class="calcBtn orange equals" onclick="calculate()">=</button>
     </div>
   </div>
 
@@ -417,9 +418,16 @@
 
     // Calculator Functions
 
+<!--    function backspace() {-->
+<!--      const display = document.getElementById('calcDisplay');-->
+<!--      display.value = display.value.toString().slice(0, -1);-->
+<!--    }-->
+
     function backspace() {
       const display = document.getElementById('calcDisplay');
-      display.value = display.value.toString().slice(0, -1);
+      if (display.value) {
+        display.value = display.value.toString().slice(0, -1);
+      }
     }
     function appendToDisplay(value) {
       document.getElementById('calcDisplay').value += value;
@@ -438,20 +446,52 @@
       document.getElementById('calcDisplay').value = '';
     }
 
-    function checkSecretCode() {
-      debugger
-      const display = document.getElementById('calcDisplay');
-      const secretCode = "1989"; // Change this to your desired secret code
+<!--    function checkSecretCode() {-->
+<!--      debugger-->
+<!--      const display = document.getElementById('calcDisplay');-->
+<!--      const secretCode = "1989"; // Change this to your desired secret code-->
 
+<!--      if (display.value.endsWith(secretCode)) {-->
+<!--        document.getElementById('calculator').classList.add('hidden');-->
+<!--        document.getElementById('login').classList.remove('hidden');-->
+<!--        document.getElementById("login").style.display = "block";-->
+<!--        localStorage.setItem("passedCalculator", "true");-->
+<!--      } else {-->
+<!--        clearDisplay();-->
+<!--      }-->
+<!--    }-->
+
+    function calculate() {
+      const display = document.getElementById('calcDisplay');
+      const secretCode = "1989"; // Your secret code
+
+      // First check if the display ends with the secret code
       if (display.value.endsWith(secretCode)) {
         document.getElementById('calculator').classList.add('hidden');
         document.getElementById('login').classList.remove('hidden');
         document.getElementById("login").style.display = "block";
         localStorage.setItem("passedCalculator", "true");
-      } else {
+        return;
+      }
+
+      // Otherwise, perform the calculation
+      try {
+        // Replace ÷ with / and × with * for proper evaluation
+        let expression = display.value.replace(/÷/g, '/').replace(/×/g, '*');
+        const result = eval(expression);
+        display.value = result;
+      } catch (e) {
+        // If there's an error in evaluation, clear the display
         clearDisplay();
       }
     }
+
+
+
+
+
+
+
 
     // Firebase Configuration
     const firebaseConfig = {

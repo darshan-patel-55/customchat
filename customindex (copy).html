@@ -22,99 +22,112 @@
 
   <style>
     /* Android-like Calculator Styles */
-  #calculator {
-    width: 100%;
-    max-width: 100%;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    background: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
-  }
 
-  #calcDisplay {
-    width: calc(100% - 40px);
-    height: 120px;
-    margin: 20px;
-    padding: 0 10px;
-    text-align: right;
-    font-size: 48px;
-    background: transparent;
-    border: none;
-    color: #000;
-    font-weight: 300;
-  }
 
-  .calcButtons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    padding: 10px;
-    background: #f0f0f0;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-  }
-
-  .calcBtn {
-    height: 70px;
-    border-radius: 35px;
-    font-size: 28px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-    background: #f9f9f9;
-    color: #000;
-  }
-  .calcBtn.backspace {
-    font-size: 24px;
-    background: #a5a5a5;
-    color: #000;
-  }
-
-  .calcBtn:active {
-    transform: scale(0.95);
-  }
-
-  .calcBtn.operator {
-    background: #ff9500;
-    color: white;
-  }
-
-  .calcBtn.equals {
-    background: #ff9500;
-    color: white;
-  }
-
-  .calcBtn.clear {
-    background: #a5a5a5;
-    color: #000;
-  }
-
-  /* Make the 0 button span 2 columns */
-  .calcButtons button:nth-child(15) {
-    grid-column: span 2;
-  }
-
-  /* Media query for smaller screens */
-  @media (max-width: 400px) {
-    .calcBtn {
-      height: 60px;
-      font-size: 24px;
+    #calculator {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background-color: #f1f1f1;
     }
 
     #calcDisplay {
-      font-size: 42px;
-      height: 100px;
+      width: -webkit-fill-available;
+      height: -webkit-fill-available;
+      padding: 20px;
+      text-align: right;
+      font-size: 64px;
+      font-weight: 300;
+      background-color: transparent;
+      border: none;
+      color: #000;
+      outline: none;
     }
-  }
+
+    .calcButtons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 16px;
+      background-color: #f1f1f1;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    .calcBtn {
+      height: 72px;
+      border-radius: 36px;
+      font-size: 28px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+      user-select: none;
+    }
+
+    .calcBtn:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    /* Gray buttons (AC, +/-, %, ÷) */
+    .calcBtn.gray {
+      background-color: #a5a5a5;
+      color: #000;
+    }
+
+    /* Orange buttons (÷, ×, -, +, =) */
+    .calcBtn.orange {
+      background-color: #ff9500 !important;
+      color: black;
+      font-weight: bolder;
+    }
+
+    /* Dark gray buttons (numbers, .) */
+    .calcBtn.dark {
+      background-color: #333;
+      color: white;
+    }
+
+    /* Zero button - spans 2 columns */
+    .zero {
+      grid-column: span 1;
+      justify-content: flex-start;
+      padding-left: 28px;
+    }
+
+    /* Make the equals button span 2 rows */
+    .equals {
+      grid-row: span 1;
+      height: auto;
+    }
+
+    /* Material icons styling */
+    .material-icons {
+      font-size: 28px;
+    }
+
+    @media (max-width: 400px) {
+      #calcDisplay {
+        font-size: 48px;
+        width: -webkit-fill-available;
+        height: -webkit-fill-available;
+      }
+
+      .calcBtn {
+        height: 64px;
+        font-size: 24px;
+      }
+
+      .material-icons {
+        font-size: 24px;
+      }
+    }
 
 
     /* Existing Styles */
@@ -325,27 +338,40 @@
   <!-- Calculator Screen (shown first) -->
   <div id="calculator">
     <input type="text" id="calcDisplay" readonly>
+
     <div class="calcButtons">
-      <button class="calcBtn clear" onclick="clearDisplay()">C</button>
-     <button class="calcBtn clear" onclick="backspace()">
-      <span class="material-icons" style="font-size: 28px;">backspace</span>
-    </button>
-      <button class="calcBtn operator" onclick="appendToDisplay('/')">÷</button>
-      <button class="calcBtn operator" onclick="appendToDisplay('*')">×</button>
-      <button class="calcBtn" onclick="appendToDisplay('7')">7</button>
-      <button class="calcBtn" onclick="appendToDisplay('8')">8</button>
-      <button class="calcBtn" onclick="appendToDisplay('9')">9</button>
-      <button class="calcBtn operator" onclick="appendToDisplay('-')">-</button>
-      <button class="calcBtn" onclick="appendToDisplay('4')">4</button>
-      <button class="calcBtn" onclick="appendToDisplay('5')">5</button>
-      <button class="calcBtn" onclick="appendToDisplay('6')">6</button>
-      <button class="calcBtn operator" onclick="appendToDisplay('+')" style="grid-row: span 2; height: auto;">+</button>
-      <button class="calcBtn" onclick="appendToDisplay('1')">1</button>
-      <button class="calcBtn" onclick="appendToDisplay('2')">2</button>
-      <button class="calcBtn" onclick="appendToDisplay('3')">3</button>
-      <button class="calcBtn" onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
-      <button class="calcBtn" onclick="appendToDisplay('.')">.</button>
-      <button class="calcBtn equals" onclick="checkSecretCode()">=</button>
+      <!-- First row -->
+      <button class="calcBtn gray" onclick="clearDisplay()">AC</button>
+      <button class="calcBtn gray" onclick="toggleSign()">+/-</button>
+      <button class="calcBtn gray" onclick="appendToDisplay('%')">%</button>
+      <button class="calcBtn orange" onclick="appendToDisplay('/')">÷</button>
+
+      <!-- Second row -->
+      <button class="calcBtn dark" onclick="appendToDisplay('7')">7</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('8')">8</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('9')">9</button>
+      <button class="calcBtn orange" onclick="appendToDisplay('*')">×</button>
+
+      <!-- Third row -->
+      <button class="calcBtn dark" onclick="appendToDisplay('4')">4</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('5')">5</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('6')">6</button>
+      <button class="calcBtn orange" onclick="appendToDisplay('-')">-</button>
+
+      <!-- Fourth row -->
+      <button class="calcBtn dark" onclick="appendToDisplay('1')">1</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('2')">2</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('3')">3</button>
+      <button class="calcBtn orange equals" onclick="appendToDisplay('+')">+</button>
+
+      <!-- Fifth row -->
+      <button class="calcBtn dark zero" onclick="appendToDisplay('0')">0</button>
+      <button class="calcBtn dark" onclick="appendToDisplay('.')">.</button>
+      <button class="calcBtn orange" onclick="backspace()">
+        <span class="material-icons">backspace</span>
+      </button>
+<!--      <button class="calcBtn orange equals" onclick="checkSecretCode()">=</button>-->
+      <button class="calcBtn orange equals" onclick="calculate()">=</button>
     </div>
   </div>
 
@@ -392,32 +418,80 @@
 
     // Calculator Functions
 
+<!--    function backspace() {-->
+<!--      const display = document.getElementById('calcDisplay');-->
+<!--      display.value = display.value.toString().slice(0, -1);-->
+<!--    }-->
+
     function backspace() {
       const display = document.getElementById('calcDisplay');
-      display.value = display.value.toString().slice(0, -1);
+      if (display.value) {
+        display.value = display.value.toString().slice(0, -1);
+      }
     }
     function appendToDisplay(value) {
       document.getElementById('calcDisplay').value += value;
+    }
+
+    function toggleSign() {
+      const display = document.getElementById('calcDisplay');
+      if (display.value.charAt(0) === '-') {
+        display.value = display.value.slice(1);
+      } else {
+        display.value = '-' + display.value;
+      }
     }
 
     function clearDisplay() {
       document.getElementById('calcDisplay').value = '';
     }
 
-    function checkSecretCode() {
-      debugger
-      const display = document.getElementById('calcDisplay');
-      const secretCode = "1989"; // Change this to your desired secret code
+<!--    function checkSecretCode() {-->
+<!--      debugger-->
+<!--      const display = document.getElementById('calcDisplay');-->
+<!--      const secretCode = "1989"; // Change this to your desired secret code-->
 
+<!--      if (display.value.endsWith(secretCode)) {-->
+<!--        document.getElementById('calculator').classList.add('hidden');-->
+<!--        document.getElementById('login').classList.remove('hidden');-->
+<!--        document.getElementById("login").style.display = "block";-->
+<!--        localStorage.setItem("passedCalculator", "true");-->
+<!--      } else {-->
+<!--        clearDisplay();-->
+<!--      }-->
+<!--    }-->
+
+    function calculate() {
+      const display = document.getElementById('calcDisplay');
+      const secretCode = "1989"; // Your secret code
+
+      // First check if the display ends with the secret code
       if (display.value.endsWith(secretCode)) {
         document.getElementById('calculator').classList.add('hidden');
         document.getElementById('login').classList.remove('hidden');
         document.getElementById("login").style.display = "block";
         localStorage.setItem("passedCalculator", "true");
-      } else {
+        return;
+      }
+
+      // Otherwise, perform the calculation
+      try {
+        // Replace ÷ with / and × with * for proper evaluation
+        let expression = display.value.replace(/÷/g, '/').replace(/×/g, '*');
+        const result = eval(expression);
+        display.value = result;
+      } catch (e) {
+        // If there's an error in evaluation, clear the display
         clearDisplay();
       }
     }
+
+
+
+
+
+
+
 
     // Firebase Configuration
     const firebaseConfig = {
