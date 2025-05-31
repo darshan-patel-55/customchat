@@ -385,12 +385,13 @@
 
   <!-- Chat App (hidden initially) -->
   <div id="chatApp" class="hidden" style="flex-grow: 1;">
-    <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
-      <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
-    </h3>
-    <p id="presenceInfo" style="margin-bottom: 10px;"></p>
-    <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
-
+    <div style="position: sticky;top: 0; width: -webkit-fill-available;padding: 0px 7px 0px 0px;margin: 0px;">
+      <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
+        <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
+      </h3>
+      <p id="presenceInfo" style="margin-bottom: 10px;"></p>
+      <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
+    </div>
     <div id="chatBox"></div>
 
     <div class="input-group">
