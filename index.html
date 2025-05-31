@@ -15,11 +15,15 @@
 
   <link rel="manifest" href="manifest.json">
 
+
+<link rel="apple-touch-icon" href="icon-192x192.png">
+
   <!-- Add these meta tags -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="application-name" content="D&D Chat">
   <meta name="apple-mobile-web-app-title" content="D&D Chat">
+  <link rel="manifest" href="/manifest.json">
 
   <style>
     /* Calculator Styles */
@@ -358,6 +362,76 @@
   </div>
 
   <script>
+
+
+
+    // At the top of your script
+let deferredPrompt = null; // Make sure this is declared at the top level
+const installButton = document.getElementById('installButton');
+installButton.style.display = 'none'; // Hide by default
+
+// Single beforeinstallprompt event listener
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('beforeinstallprompt event fired');
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  // Show the install button
+  installButton.style.display = 'block';
+
+  // Optional: Automatically hide the button after 30 seconds
+  setTimeout(() => {
+    if (deferredPrompt) {
+      installButton.style.display = 'none';
+      deferredPrompt = null;
+    }
+  }, 30000);
+});
+
+// Install button click handler
+installButton.addEventListener('click', async (e) => {
+  console.log('Install button clicked');
+  if (!deferredPrompt) {
+    console.log('No deferred prompt available');
+    installButton.style.display = 'none';
+    return;
+  }
+
+  // Show the install prompt
+  deferredPrompt.prompt();
+
+  // Wait for the user to respond to the prompt
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log(`User response to the install prompt: ${outcome}`);
+
+  // We've used the prompt, and can't use it again
+  deferredPrompt = null;
+
+  // Hide the install button
+  installButton.style.display = 'none';
+});
+
+// Track when the app is installed
+window.addEventListener('appinstalled', (evt) => {
+  console.log('App was installed');
+  installButton.style.display = 'none';
+  deferredPrompt = null;
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Calculator Functions
     function appendToDisplay(value) {
       document.getElementById('calcDisplay').value += value;
@@ -399,9 +473,6 @@
     let currentUser = "";
     let editMessageKey = null;
 
-    // PWA variables
-    let deferredPrompt;
-    const installButton = document.getElementById('installButton');
 
     // Check if user already passed calculator screen
     document.addEventListener("DOMContentLoaded", () => {
@@ -434,17 +505,18 @@
       // Register service worker for PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('ServiceWorker registration successful');
-          }).catch(err => {
-            console.log('ServiceWorker registration failed: ', err);
-          });
+          navigator.serviceWorker.register('sw.js').then(registration => {
+              console.log('ServiceWorker registration successful');
+            }).catch(err => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
         });
       }
 
 
 
     window.addEventListener('beforeinstallprompt', (e) => {
+      debugger;
       e.preventDefault();
       deferredPrompt = e;
 
@@ -467,15 +539,6 @@
       }, 5000);
     });
 
-      // Listen for beforeinstallprompt event
-      window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent the mini-infobar from appearing on mobile
-        e.preventDefault();
-        // Stash the event so it can be triggered later
-        deferredPrompt = e;
-        // Update UI notify the user they can install the PWA
-        installButton.style.display = 'block';
-      });
 
       // Install button click handler
       installButton.addEventListener('click', (e) => {
