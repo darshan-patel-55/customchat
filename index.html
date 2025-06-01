@@ -426,7 +426,6 @@
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
-  debugger
   // Prevent the mini-infobar from appearing on mobile
   e.preventDefault();
   // Stash the event so it can be triggered later
@@ -554,7 +553,6 @@ function showInstallPromotion() {
 
     // Check if user already passed calculator screen
     document.addEventListener("DOMContentLoaded", () => {
-      debugger
       const passedCalculator = localStorage.getItem("passedCalculator");
       if (passedCalculator) {
         document.getElementById('calculator').classList.add('hidden');
@@ -572,6 +570,12 @@ function showInstallPromotion() {
         setUserOnlineStatus();
         listenToChat();
         listenToStatus();
+      }
+
+
+      if (passedCalculator && !savedUser) {
+        document.getElementById('calculator').classList.remove('hidden');
+        document.getElementById('login').classList.add('hidden');
       }
 
       document.getElementById("messageInput").addEventListener("keypress", function (e) {
