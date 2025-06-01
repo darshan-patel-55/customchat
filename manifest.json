@@ -1,20 +1,47 @@
+//{
+//  "name": "Calculator",
+//  "short_name": "Calculator",
+//  "start_url": "/customchat/",
+//  "display": "standalone",
+//  "background_color": "#fafafa",
+//  "theme_color": "#3897f0",
+//  "icons": [
+//    {
+//      "src": "/customchat/icon-192x192.png",
+//      "type": "image/png",
+//      "sizes": "192x192"
+//    },
+//    {
+//      "src": "/customchat/icon-512x512.png",
+//      "type": "image/png",
+//      "sizes": "512x512"
+//    }
+//  ]
+//}
+
+
+
 {
   "name": "Calculator",
-  "short_name": "Calculator",
-  "start_url": "/customchat/",
+  "short_name": "Chat",
+  "start_url": "/customchat/index.html",
   "display": "standalone",
-  "background_color": "#fafafa",
-  "theme_color": "#3897f0",
+  "background_color": "#f1f1f1",
+  "theme_color": "#ff9500",
+  "description": "A private Calculator application",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/customchat/icon-192x192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "/customchat/icon-512x512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ]
 }
