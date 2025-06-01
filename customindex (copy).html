@@ -12,12 +12,19 @@
   <link rel="manifest" href="/customchat/manifest.json">
   <!-- For iOS support (optional) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Calculator">
   <link rel="apple-touch-icon" href="/customchat/favicon.ico">
   <meta name="mobile-web-app-capable" content="yes">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+
+<meta name="application-name" content="Calculator">
+<meta name="theme-color" content="#ff9500">
+<meta name="msapplication-navbutton-color" content="#ff9500">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="msapplication-starturl" content="/customchat/index.html">
 
 
   <style>
@@ -323,7 +330,7 @@
         padding: 8px 10px;
       }
       #chatBox {
-        height: 65vh;
+        height: 70vh;
         justify-content: end;
       }
     }
@@ -413,6 +420,52 @@
   });
 }
 
+
+
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  // Show your own install button
+  showInstallPromotion();
+});
+
+function showInstallPromotion() {
+  // Create your own install button
+  const installBtn = document.createElement('button');
+  installBtn.textContent = 'Install App';
+  installBtn.style.position = 'fixed';
+  installBtn.style.bottom = '20px';
+  installBtn.style.right = '20px';
+  installBtn.style.zIndex = '1000';
+  installBtn.style.padding = '10px 20px';
+  installBtn.style.backgroundColor = '#ff9500';
+  installBtn.style.color = 'white';
+  installBtn.style.border = 'none';
+  installBtn.style.borderRadius = '5px';
+
+  installBtn.onclick = () => {
+    // Hide our user interface
+    installBtn.style.display = 'none';
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted install prompt');
+      } else {
+        console.log('User dismissed install prompt');
+      }
+      deferredPrompt = null;
+    });
+  };
+
+  document.body.appendChild(installBtn);
+}
 // PWA serviceWorker
 
 
@@ -446,21 +499,6 @@
     function clearDisplay() {
       document.getElementById('calcDisplay').value = '';
     }
-
-<!--    function checkSecretCode() {-->
-<!--      debugger-->
-<!--      const display = document.getElementById('calcDisplay');-->
-<!--      const secretCode = "2402"; // Change this to your desired secret code-->
-
-<!--      if (display.value.endsWith(secretCode)) {-->
-<!--        document.getElementById('calculator').classList.add('hidden');-->
-<!--        document.getElementById('login').classList.remove('hidden');-->
-<!--        document.getElementById("login").style.display = "block";-->
-<!--        localStorage.setItem("passedCalculator", "true");-->
-<!--      } else {-->
-<!--        clearDisplay();-->
-<!--      }-->
-<!--    }-->
 
     function calculate() {
       const display = document.getElementById('calcDisplay');
@@ -515,7 +553,6 @@
 
     // Check if user already passed calculator screen
     document.addEventListener("DOMContentLoaded", () => {
-      debugger
       const passedCalculator = localStorage.getItem("passedCalculator");
       if (passedCalculator) {
         document.getElementById('calculator').classList.add('hidden');
@@ -533,6 +570,11 @@
         setUserOnlineStatus();
         listenToChat();
         listenToStatus();
+      }
+
+      if (passedCalculator && !savedUser) {
+        document.getElementById('calculator').classList.remove('hidden');
+        document.getElementById('login').classList.add('hidden');
       }
 
       document.getElementById("messageInput").addEventListener("keypress", function (e) {
