@@ -385,12 +385,13 @@
 
   <!-- Chat App (hidden initially) -->
   <div id="chatApp" class="hidden" style="flex-grow: 1;">
-    <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
-      <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
-    </h3>
-    <p id="presenceInfo" style="margin-bottom: 10px;"></p>
-    <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
-
+<!--    <div style="position: sticky;top: 0; width: -webkit-fill-available;padding: 0px 7px 0px 0px;margin: 0px;">-->
+      <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
+        <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
+      </h3>
+      <p id="presenceInfo" style="margin-bottom: 10px;"></p>
+      <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
+<!--    </div>-->
     <div id="chatBox"></div>
 
     <div class="input-group">
@@ -449,7 +450,7 @@
 <!--    function checkSecretCode() {-->
 <!--      debugger-->
 <!--      const display = document.getElementById('calcDisplay');-->
-<!--      const secretCode = "1989"; // Change this to your desired secret code-->
+<!--      const secretCode = "2402"; // Change this to your desired secret code-->
 
 <!--      if (display.value.endsWith(secretCode)) {-->
 <!--        document.getElementById('calculator').classList.add('hidden');-->
@@ -463,13 +464,14 @@
 
     function calculate() {
       const display = document.getElementById('calcDisplay');
-      const secretCode = "1989"; // Your secret code
+      const secretCode = "2402"; // Your secret code
 
       // First check if the display ends with the secret code
       if (display.value.endsWith(secretCode)) {
         document.getElementById('calculator').classList.add('hidden');
         document.getElementById('login').classList.remove('hidden');
         document.getElementById("login").style.display = "block";
+        document.getElementById("password").focus();
         localStorage.setItem("passedCalculator", "true");
         return;
       }
@@ -516,7 +518,7 @@
       const passedCalculator = localStorage.getItem("passedCalculator");
       if (passedCalculator) {
         document.getElementById('calculator').classList.add('hidden');
-        document.getElementById('login').classList.remove('hidden');
+        document.getElementById('login').classList.add('hidden');
       }
 
       const savedUser = localStorage.getItem("currentUser");
@@ -525,6 +527,7 @@
         document.getElementById("userName").innerText = currentUser;
         document.getElementById("login").style.display = "none";
         document.getElementById("chatApp").style.display = "block";
+        document.getElementById("chatApp").classList.remove('hidden');
 
         setUserOnlineStatus();
         listenToChat();
@@ -725,7 +728,6 @@
   }
 
     function login() {
-      debugger
       const pw = document.getElementById("password").value;
       if (users[pw]) {
         currentUser = users[pw];
@@ -735,6 +737,7 @@
         document.getElementById("login").style.display = "none";
         document.getElementById('chatApp').classList.remove('hidden');
         document.getElementById("chatApp").style.display = "block";
+        document.getElementById("messageInput").focus();
 
         setUserOnlineStatus();
         listenToChat();

@@ -518,7 +518,7 @@
       const passedCalculator = localStorage.getItem("passedCalculator");
       if (passedCalculator) {
         document.getElementById('calculator').classList.add('hidden');
-        document.getElementById('login').classList.remove('hidden');
+        document.getElementById('login').classList.add('hidden');
       }
 
       const savedUser = localStorage.getItem("currentUser");
@@ -527,6 +527,7 @@
         document.getElementById("userName").innerText = currentUser;
         document.getElementById("login").style.display = "none";
         document.getElementById("chatApp").style.display = "block";
+        document.getElementById("chatApp").classList.remove('hidden');
 
         setUserOnlineStatus();
         listenToChat();
