@@ -1,26 +1,3 @@
-//{
-//  "name": "Calculator",
-//  "short_name": "Calculator",
-//  "start_url": "/customchat/",
-//  "display": "standalone",
-//  "background_color": "#fafafa",
-//  "theme_color": "#3897f0",
-//  "icons": [
-//    {
-//      "src": "/customchat/icon-192x192.png",
-//      "type": "image/png",
-//      "sizes": "192x192"
-//    },
-//    {
-//      "src": "/customchat/icon-512x512.png",
-//      "type": "image/png",
-//      "sizes": "512x512"
-//    }
-//  ]
-//}
-
-
-
 {
   "name": "Calculator",
   "short_name": "Chat",
