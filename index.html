@@ -515,12 +515,13 @@
 
     // Check if user already passed calculator screen
     document.addEventListener("DOMContentLoaded", () => {
+      debugger
       const passedCalculator = localStorage.getItem("passedCalculator");
       if (passedCalculator) {
         document.getElementById('calculator').classList.add('hidden');
         document.getElementById('login').classList.add('hidden');
       }
-
+      document.getElementById('chatApp').removeAttribute('style');
       const savedUser = localStorage.getItem("currentUser");
       if (savedUser) {
         currentUser = savedUser;
