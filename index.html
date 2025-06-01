@@ -426,6 +426,7 @@
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
+  debugger
   // Prevent the mini-infobar from appearing on mobile
   e.preventDefault();
   // Stash the event so it can be triggered later
@@ -572,7 +573,7 @@ function showInstallPromotion() {
         listenToStatus();
       }
 
-
+      debugger
       if (passedCalculator && !savedUser) {
         document.getElementById('calculator').classList.remove('hidden');
         document.getElementById('login').classList.add('hidden');
