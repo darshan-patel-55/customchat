@@ -1,6 +1,6 @@
 {
   "name": "Calculator",
-  "short_name": "Chat",
+  "short_name": "Calculator",
   "start_url": "/customchat/index.html",
   "display": "standalone",
   "background_color": "#f1f1f1",
