@@ -18,19 +18,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-
-
 <meta name="application-name" content="Calculator">
 <meta name="theme-color" content="#ff9500">
 <meta name="msapplication-navbutton-color" content="#ff9500">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="msapplication-starturl" content="/customchat/index.html">
 
-
   <style>
     /* Android-like Calculator Styles */
-
-
     #calculator {
       width: 100%;
       height: 100vh;
@@ -135,7 +130,6 @@
         font-size: 24px;
       }
     }
-
 
     /* Existing Styles */
     html, body {
@@ -339,6 +333,50 @@
     .hidden {
       display: none !important;
     }
+
+    /* Reply message styles */
+    .message.reply {
+      border-left: 3px solid #3897f0;
+      padding-left: 10px;
+      margin-left: 20px;
+    }
+
+    .reply-preview {
+      background-color: #f5f5f5;
+      border-radius: 12px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+      color: #666;
+      border-left: 2px solid #3897f0;
+    }
+
+    .reply-info {
+      font-size: 0.8em;
+      color: #3897f0;
+      margin-bottom: 4px;
+    }
+
+    .reply-username {
+      font-weight: bold;
+    }
+
+    .reply-cancel {
+      color: #ff0000;
+      font-size: 12px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .reply-indicator {
+      background-color: #e0f7fa;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -377,7 +415,6 @@
       <button class="calcBtn orange" onclick="backspace()">
         <span class="material-icons">backspace</span>
       </button>
-<!--      <button class="calcBtn orange equals" onclick="checkSecretCode()">=</button>-->
       <button class="calcBtn orange equals" onclick="calculate()">=</button>
     </div>
   </div>
@@ -392,13 +429,11 @@
 
   <!-- Chat App (hidden initially) -->
   <div id="chatApp" class="hidden" style="flex-grow: 1;">
-<!--    <div style="position: sticky;top: 0; width: -webkit-fill-available;padding: 0px 7px 0px 0px;margin: 0px;">-->
-      <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
-        <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
-      </h3>
-      <p id="presenceInfo" style="margin-bottom: 10px;"></p>
-      <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
-<!--    </div>-->
+    <h3 style="display: flex;justify-content: space-between;align-items: baseline;margin: 10px 0px 0px 0px;"><span>Welcome, <span id="userName"></span></span>
+      <button onclick="logout()" style="margin-bottom: 10px;background-color: #ddd;color: #FFFF;padding: 5px 5px 5px 5px;">Logout</button>
+    </h3>
+    <p id="presenceInfo" style="margin-bottom: 10px;"></p>
+    <div id="lastSeenInfo" style="font-size: 0.9em; color: gray;"></div>
     <div id="chatBox"></div>
 
     <div class="input-group">
@@ -409,80 +444,62 @@
   </div>
 
   <script>
+    let replyingTo = null;
 
-// PWA serviceWorker
+    // PWA serviceWorker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/customchat/sw.js")
+          .then(reg => console.log("✅ Service Worker Registered"))
+          .catch(err => console.log("❌ Service Worker Failed:", err));
+      });
+    }
 
-  if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/customchat/sw.js")
-      .then(reg => console.log("✅ Service Worker Registered"))
-      .catch(err => console.log("❌ Service Worker Failed:", err));
-  });
-}
+    let deferredPrompt;
 
-
-
-
-let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Prevent the mini-infobar from appearing on mobile
-  e.preventDefault();
-  // Stash the event so it can be triggered later
-  deferredPrompt = e;
-  // Show your own install button
-  showInstallPromotion();
-});
-
-function showInstallPromotion() {
-  // Create your own install button
-  const installBtn = document.createElement('button');
-  installBtn.textContent = 'Install App';
-  installBtn.style.position = 'fixed';
-  installBtn.style.bottom = '20px';
-  installBtn.style.right = '20px';
-  installBtn.style.zIndex = '1000';
-  installBtn.style.padding = '10px 20px';
-  installBtn.style.backgroundColor = '#ff9500';
-  installBtn.style.color = 'white';
-  installBtn.style.border = 'none';
-  installBtn.style.borderRadius = '5px';
-
-  installBtn.onclick = () => {
-    // Hide our user interface
-    installBtn.style.display = 'none';
-    // Show the install prompt
-    deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted install prompt');
-      } else {
-        console.log('User dismissed install prompt');
-      }
-      deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallPromotion();
     });
-  };
 
-  document.body.appendChild(installBtn);
-}
-// PWA serviceWorker
+    function showInstallPromotion() {
+      const installBtn = document.createElement('button');
+      installBtn.textContent = 'Install App';
+      installBtn.style.position = 'fixed';
+      installBtn.style.bottom = '20px';
+      installBtn.style.right = '20px';
+      installBtn.style.zIndex = '1000';
+      installBtn.style.padding = '10px 20px';
+      installBtn.style.backgroundColor = '#ff9500';
+      installBtn.style.color = 'white';
+      installBtn.style.border = 'none';
+      installBtn.style.borderRadius = '5px';
 
+      installBtn.onclick = () => {
+        installBtn.style.display = 'none';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted install prompt');
+          } else {
+            console.log('User dismissed install prompt');
+          }
+          deferredPrompt = null;
+        });
+      };
 
+      document.body.appendChild(installBtn);
+    }
 
     // Calculator Functions
-
-<!--    function backspace() {-->
-<!--      const display = document.getElementById('calcDisplay');-->
-<!--      display.value = display.value.toString().slice(0, -1);-->
-<!--    }-->
-
     function backspace() {
       const display = document.getElementById('calcDisplay');
       if (display.value) {
         display.value = display.value.toString().slice(0, -1);
       }
     }
+
     function appendToDisplay(value) {
       document.getElementById('calcDisplay').value += value;
     }
@@ -525,13 +542,6 @@ function showInstallPromotion() {
         clearDisplay();
       }
     }
-
-
-
-
-
-
-
 
     // Firebase Configuration
     const firebaseConfig = {
@@ -586,9 +596,8 @@ function showInstallPromotion() {
       });
     });
 
-    // Rest of your existing functions remain the same...
-    function startEditMessage(key, oldMessage) {
-      document.getElementById("messageInput").value = oldMessage;
+    function startEditMessage(key, messageData) {
+      document.getElementById("messageInput").value = messageData.message;
       editMessageKey = key;
 
       const sendBtn = document.querySelector("button[onclick='sendMessage()']");
@@ -619,7 +628,7 @@ function showInstallPromotion() {
     }
 
     function sendMessage() {
-      const input = document.getElementById("messageInput");
+      const input = document.getElementById('messageInput');
       const msg = input.value.trim();
       if (!msg) return;
 
@@ -643,11 +652,23 @@ function showInstallPromotion() {
         editMessageKey = null;
         document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
       } else {
-        const chatMessage = {
+        let chatMessage = {
           user: currentUser,
           message: msg,
           time: now
         };
+
+        if (replyingTo) {
+          chatMessage = {
+            ...chatMessage,
+            replyTo: replyingTo.key,
+            replyPreview: replyingTo.message,
+            replyUser: replyingTo.user,
+            isReply: true
+          };
+          cancelReply();
+        }
+
         db.ref("chat").push(chatMessage);
       }
 
@@ -655,12 +676,62 @@ function showInstallPromotion() {
       input.focus();
     }
 
+    function setupReply(messageKey, messageData) {
+      replyingTo = {
+        key: messageKey,
+        ...messageData
+      };
+
+      // Show reply indicator
+      const inputGroup = document.querySelector('.input-group');
+      const existingIndicator = document.getElementById('replyIndicator');
+
+      if (existingIndicator) {
+        existingIndicator.remove();
+      }
+
+      const indicator = document.createElement('div');
+      indicator.id = 'replyIndicator';
+      indicator.className = 'reply-indicator';
+      indicator.innerHTML = `
+        <div>
+          <span class="reply-info">Replying to <span class="reply-username">${messageData.user}</span></span>
+          <div class="reply-preview">${messageData.message}</div>
+        </div>
+        <span class="reply-cancel" onclick="cancelReply()">✕</span>
+      `;
+
+      inputGroup.prepend(indicator);
+      document.getElementById('messageInput').focus();
+    }
+
+    function cancelReply() {
+      replyingTo = null;
+      const indicator = document.getElementById('replyIndicator');
+      if (indicator) {
+        indicator.remove();
+      }
+    }
+
     function renderMessage(data, key) {
-      const { user, message, time } = data;
+      const { user, message, time, replyTo, replyPreview, replyUser, isReply } = data;
       const isCurrent = user === currentUser;
 
       const msgDiv = document.createElement("div");
-      msgDiv.className = "message" + (isCurrent ? " own" : "");
+      msgDiv.className = "message" + (isCurrent ? " own" : "") + (replyTo ? " reply" : "");
+
+      // Add reply context if this is a reply
+      if (isReply && replyTo) {
+        const replyContext = document.createElement("div");
+        replyContext.className = "reply-info";
+        replyContext.innerHTML = `Replying to <span class="reply-username">${replyUser}</span>`;
+        msgDiv.appendChild(replyContext);
+
+        const replyPreviewDiv = document.createElement("div");
+        replyPreviewDiv.className = "reply-preview";
+        replyPreviewDiv.innerText = replyPreview;
+        msgDiv.appendChild(replyPreviewDiv);
+      }
 
       const nameDiv = document.createElement("div");
       nameDiv.className = "sender";
@@ -684,18 +755,20 @@ function showInstallPromotion() {
       msgDiv.appendChild(msgText);
       msgDiv.appendChild(timeDiv);
 
+      // Message actions menu
+      const menuIcon = document.createElement("div");
+      menuIcon.className = "menu-icon";
+      menuIcon.innerText = "⋮";
+
+      const dropdown = document.createElement("div");
+      dropdown.className = "dropdown";
+
+      // Edit and Delete options for own messages
       if (isCurrent) {
-        const menuIcon = document.createElement("div");
-        menuIcon.className = "menu-icon";
-        menuIcon.innerText = "⋮";
-
-        const dropdown = document.createElement("div");
-        dropdown.className = "dropdown";
-
         const editOption = document.createElement("a");
         editOption.innerText = "Edit";
         editOption.onclick = () => {
-          startEditMessage(key, message);
+          startEditMessage(key, data);
           dropdown.style.display = "none";
         };
 
@@ -708,20 +781,42 @@ function showInstallPromotion() {
           dropdown.style.display = "none";
         };
 
-        dropdown.appendChild(editOption);
-        dropdown.appendChild(deleteOption);
-        msgDiv.appendChild(menuIcon);
-        msgDiv.appendChild(dropdown);
-
-        menuIcon.onclick = (e) => {
+        const replyOption = document.createElement("a");
+        replyOption.innerText = "Reply";
+        replyOption.onclick = (e) => {
           e.stopPropagation();
-          dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+          setupReply(key, data);
+          dropdown.style.display = "none";
         };
 
-        document.addEventListener("click", () => {
-          dropdown.style.display = "none";
-        }, { once: true });
+        dropdown.appendChild(editOption);
+        dropdown.appendChild(deleteOption);
+        dropdown.appendChild(replyOption);
       }
+      // Reply option for others' messages
+      else {
+        const replyOption = document.createElement("a");
+        replyOption.innerText = "Reply";
+        replyOption.onclick = (e) => {
+          e.stopPropagation();
+          setupReply(key, data);
+          dropdown.style.display = "none";
+        };
+
+        dropdown.appendChild(replyOption);
+      }
+
+      msgDiv.appendChild(menuIcon);
+      msgDiv.appendChild(dropdown);
+
+      menuIcon.onclick = (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+      };
+
+      document.addEventListener("click", () => {
+        dropdown.style.display = "none";
+      }, { once: true });
 
       return msgDiv;
     }
@@ -759,16 +854,15 @@ function showInstallPromotion() {
     }
 
     function logout() {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("passedCalculator");
-    db.ref(`status/${currentUser}`).set({ state: "offline", lastChanged: Date.now() });
-    currentUser = "";
-    document.getElementById("chatApp").style.display = "none";
-<!--    document.getElementById("login").style.display = "block";-->
-    document.getElementById("calculator").style.display = "block";
-    document.getElementById("password").value = "";
-    location.replace('https://www.google.in');
-  }
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("passedCalculator");
+      db.ref(`status/${currentUser}`).set({ state: "offline", lastChanged: Date.now() });
+      currentUser = "";
+      document.getElementById("chatApp").style.display = "none";
+      document.getElementById("calculator").style.display = "block";
+      document.getElementById("password").value = "";
+      location.replace('https://www.google.in');
+    }
 
     function login() {
       const pw = document.getElementById("password").value;

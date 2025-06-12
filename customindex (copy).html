@@ -339,6 +339,111 @@
     .hidden {
       display: none !important;
     }
+
+
+    /* Add these styles to your existing CSS */
+      .message.reply {
+        border-left: 3px solid #3897f0;
+        padding-left: 10px;
+        margin-left: 20px;
+      }
+
+      .reply-preview {
+        background-color: #f5f5f5;
+        border-radius: 12px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+        color: #666;
+        border-left: 2px solid #3897f0;
+      }
+
+      .reply-info {
+        font-size: 0.8em;
+        color: #3897f0;
+        margin-bottom: 4px;
+      }
+
+      .reply-username {
+        font-weight: bold;
+      }
+
+      .reply-cancel {
+        color: #ff0000;
+        font-size: 12px;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+
+      .reply-indicator {
+        background-color: #e0f7fa;
+        padding: 8px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+
+
+    /* Add to your existing CSS */
+    .quoted-message {
+      background-color: #f0f2f5;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 8px 0;
+      border-left: 3px solid #25D366;
+      position: relative;
+    }
+
+    .quoted-message .sender {
+      font-weight: bold;
+      color: #25D366;
+      margin-bottom: 4px;
+    }
+
+    .quoted-message .msgText {
+      color: #333;
+    }
+
+    .quote-indicator {
+      background-color: #e0f7fa;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid #25D366;
+    }
+
+    .quote-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .quote-action-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 2px 5px;
+    }
+
+    .quote-action-btn:hover {
+      text-decoration: underline;
+    }
+
+    .own .quoted-message {
+      border-left-color: #007aff;
+    }
+    .own .quoted-message .sender {
+      color: #007aff;
+    }
+
   </style>
 </head>
 <body>
@@ -410,8 +515,104 @@
 
   <script>
 
-// PWA serviceWorker
 
+
+
+
+let replyingTo = null;
+let quotingMessage = null;
+
+
+function setupQuote(messageKey, messageData) {
+  quotingMessage = {
+    key: messageKey,
+    ...messageData
+  };
+
+  // Show quote indicator
+  const inputGroup = document.querySelector('.input-group');
+  const existingIndicator = document.getElementById('quoteIndicator');
+
+  if (existingIndicator) {
+    existingIndicator.remove();
+  }
+
+  const indicator = document.createElement('div');
+  indicator.id = 'quoteIndicator';
+  indicator.className = 'quote-indicator';
+  indicator.innerHTML = `
+    <div>
+      <span class="reply-info">Quoting <span class="reply-username">${messageData.user}</span></span>
+      <div class="quoted-message">
+        <div class="sender">${messageData.user}</div>
+        <div class="msgText">${messageData.message}</div>
+      </div>
+      <div class="quote-actions">
+        <button class="quote-action-btn" onclick="convertQuoteToReply()">Convert to Reply</button>
+        <button class="quote-action-btn" onclick="cancelQuote()">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  inputGroup.prepend(indicator);
+  document.getElementById('messageInput').focus();
+}
+
+function cancelQuote() {
+  quotingMessage = null;
+  const indicator = document.getElementById('quoteIndicator');
+  if (indicator) {
+    indicator.remove();
+  }
+}
+
+function convertQuoteToReply() {
+  if (quotingMessage) {
+    setupReply(quotingMessage.key, quotingMessage);
+    cancelQuote();
+  }
+}
+
+// Add this function to handle reply actions
+function setupReply(messageKey, messageData) {
+  replyingTo = {
+    key: messageKey,
+    ...messageData
+  };
+
+  // Show reply indicator
+  const inputGroup = document.querySelector('.input-group');
+  const existingIndicator = document.getElementById('replyIndicator');
+
+  if (existingIndicator) {
+    existingIndicator.remove();
+  }
+
+  const indicator = document.createElement('div');
+  indicator.id = 'replyIndicator';
+  indicator.className = 'reply-indicator';
+  indicator.innerHTML = `
+    <div>
+      <span class="reply-info">Replying to <span class="reply-username">${messageData.user}</span></span>
+      <div class="reply-preview">${messageData.message}</div>
+    </div>
+    <span class="reply-cancel" onclick="cancelReply()">✕</span>
+  `;
+
+  inputGroup.prepend(indicator);
+  document.getElementById('messageInput').focus();
+}
+
+function cancelReply() {
+  replyingTo = null;
+  const indicator = document.getElementById('replyIndicator');
+  if (indicator) {
+    indicator.remove();
+  }
+}
+
+
+// PWA serviceWorker
   if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/customchat/sw.js")
@@ -419,9 +620,6 @@
       .catch(err => console.log("❌ Service Worker Failed:", err));
   });
 }
-
-
-
 
 let deferredPrompt;
 
@@ -502,7 +700,7 @@ function showInstallPromotion() {
 
     function calculate() {
       const display = document.getElementById('calcDisplay');
-      const secretCode = "2402"; // Your secret code
+      const secretCode = "2411"; // Your secret code
 
       // First check if the display ends with the secret code
       if (display.value.endsWith(secretCode)) {
@@ -547,7 +745,7 @@ function showInstallPromotion() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const users = { "d": "Darshan", "divya@123": "Divya" };
+    const users = { "d": "DEF", "2411": "ABC" };
     let currentUser = "";
     let editMessageKey = null;
 
@@ -587,25 +785,25 @@ function showInstallPromotion() {
     });
 
     // Rest of your existing functions remain the same...
-    function startEditMessage(key, oldMessage) {
-      document.getElementById("messageInput").value = oldMessage;
-      editMessageKey = key;
+      function startEditMessage(key, messageData) {
+        document.getElementById("messageInput").value = messageData.message;
+        editMessageKey = key;
 
-      const sendBtn = document.querySelector("button[onclick='sendMessage()']");
-      sendBtn.innerText = "Update";
+        const sendBtn = document.querySelector("button[onclick='sendMessage()']");
+        sendBtn.innerText = "Update";
 
-      let cancelBtn = document.getElementById("cancelEditBtn");
-      if (!cancelBtn) {
-        cancelBtn = document.createElement("button");
-        cancelBtn.id = "cancelEditBtn";
-        cancelBtn.innerText = "Cancel";
-        cancelBtn.style.backgroundColor = "#ccc";
-        cancelBtn.style.marginLeft = "5px";
-        cancelBtn.style.color = "#FFFF";
-        cancelBtn.onclick = cancelEdit;
-        sendBtn.parentNode.appendChild(cancelBtn);
+        let cancelBtn = document.getElementById("cancelEditBtn");
+        if (!cancelBtn) {
+          cancelBtn = document.createElement("button");
+          cancelBtn.id = "cancelEditBtn";
+          cancelBtn.innerText = "Cancel";
+          cancelBtn.style.backgroundColor = "#ccc";
+          cancelBtn.style.marginLeft = "5px";
+          cancelBtn.style.color = "#FFFF";
+          cancelBtn.onclick = cancelEdit;
+          sendBtn.parentNode.appendChild(cancelBtn);
+        }
       }
-    }
 
     function cancelEdit() {
       editMessageKey = null;
@@ -618,49 +816,102 @@ function showInstallPromotion() {
       if (cancelBtn) cancelBtn.remove();
     }
 
+    // Modify your sendMessage function
     function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const msg = input.value.trim();
-      if (!msg) return;
+  const input = document.getElementById('messageInput');
+  const msg = input.value.trim();
+  if (!msg) return;
 
-      input.focus();
+  input.focus();
 
-      const now = new Date().toLocaleString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hour12: true,
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
+  const now = new Date().toLocaleString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
 
-      if (editMessageKey) {
-        db.ref("chat/" + editMessageKey).update({
-          message: msg,
-          time: now + " (edited)",
-        });
-        editMessageKey = null;
-        document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
-      } else {
-        const chatMessage = {
-          user: currentUser,
-          message: msg,
-          time: now
-        };
-        db.ref("chat").push(chatMessage);
-      }
+  if (editMessageKey) {
+    db.ref("chat/" + editMessageKey).update({
+      message: msg,
+      time: now + " (edited)",
+    });
+    editMessageKey = null;
+    document.querySelector("button[onclick='sendMessage()']").innerText = "Send";
+  } else {
+    let chatMessage = {
+      user: currentUser,
+      message: msg,
+      time: now
+    };
 
-      input.value = "";
-      input.focus();
+    if (replyingTo) {
+      chatMessage = {
+        ...chatMessage,
+        replyTo: replyingTo.key,
+        replyPreview: replyingTo.message,
+        replyUser: replyingTo.user,
+        isReply: true
+      };
+      cancelReply();
+    } else if (quotingMessage) {
+      chatMessage = {
+        ...chatMessage,
+        quotedMessage: quotingMessage.message,
+        quotedUser: quotingMessage.user,
+        quotedKey: quotingMessage.key,
+        isQuote: true
+      };
+      cancelQuote();
     }
 
+    db.ref("chat").push(chatMessage);
+  }
+
+  input.value = "";
+  input.focus();
+}
+
     function renderMessage(data, key) {
-      const { user, message, time } = data;
+      const { user, message, time, replyTo, replyPreview, replyUser, quotedMessage, quotedUser, isReply, isQuote } = data;
       const isCurrent = user === currentUser;
 
       const msgDiv = document.createElement("div");
-      msgDiv.className = "message" + (isCurrent ? " own" : "");
+      msgDiv.className = "message" + (isCurrent ? " own" : "") + (replyTo ? " reply" : "");
+
+      // Add quoted message if this is a quote
+      if (isQuote && quotedMessage) {
+        const quotedDiv = document.createElement("div");
+        quotedDiv.className = "quoted-message";
+
+        const quotedSender = document.createElement("div");
+        quotedSender.className = "sender";
+        quotedSender.innerText = quotedUser;
+
+        const quotedText = document.createElement("div");
+        quotedText.className = "msgText";
+        quotedText.innerText = quotedMessage;
+
+        quotedDiv.appendChild(quotedSender);
+        quotedDiv.appendChild(quotedText);
+        msgDiv.appendChild(quotedDiv);
+      }
+
+      // Add reply context if this is a reply
+      if (isReply && replyTo) {
+        const replyContext = document.createElement("div");
+        replyContext.className = "reply-info";
+        replyContext.innerHTML = `Replying to <span class="reply-username">${replyUser}</span>`;
+        msgDiv.appendChild(replyContext);
+
+        const replyPreviewDiv = document.createElement("div");
+        replyPreviewDiv.className = "reply-preview";
+        replyPreviewDiv.innerText = replyPreview;
+        msgDiv.appendChild(replyPreviewDiv);
+      }
 
       const nameDiv = document.createElement("div");
       nameDiv.className = "sender";
@@ -684,18 +935,20 @@ function showInstallPromotion() {
       msgDiv.appendChild(msgText);
       msgDiv.appendChild(timeDiv);
 
+      // Message actions menu
+      const menuIcon = document.createElement("div");
+      menuIcon.className = "menu-icon";
+      menuIcon.innerText = "⋮";
+
+      const dropdown = document.createElement("div");
+      dropdown.className = "dropdown";
+
+      // Edit and Delete options for own messages
       if (isCurrent) {
-        const menuIcon = document.createElement("div");
-        menuIcon.className = "menu-icon";
-        menuIcon.innerText = "⋮";
-
-        const dropdown = document.createElement("div");
-        dropdown.className = "dropdown";
-
         const editOption = document.createElement("a");
         editOption.innerText = "Edit";
         editOption.onclick = () => {
-          startEditMessage(key, message);
+          startEditMessage(key, data);
           dropdown.style.display = "none";
         };
 
@@ -708,20 +961,51 @@ function showInstallPromotion() {
           dropdown.style.display = "none";
         };
 
-        dropdown.appendChild(editOption);
-        dropdown.appendChild(deleteOption);
-        msgDiv.appendChild(menuIcon);
-        msgDiv.appendChild(dropdown);
-
-        menuIcon.onclick = (e) => {
+        const quoteOption = document.createElement("a");
+        quoteOption.innerText = "Quote";
+        quoteOption.onclick = (e) => {
           e.stopPropagation();
-          dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+          setupQuote(key, data);
+          dropdown.style.display = "none";
         };
 
-        document.addEventListener("click", () => {
-          dropdown.style.display = "none";
-        }, { once: true });
+        dropdown.appendChild(editOption);
+        dropdown.appendChild(deleteOption);
+        dropdown.appendChild(quoteOption);
       }
+      // Reply and Quote options for others' messages
+      else {
+        const replyOption = document.createElement("a");
+        replyOption.innerText = "Reply";
+        replyOption.onclick = (e) => {
+          e.stopPropagation();
+          setupReply(key, data);
+          dropdown.style.display = "none";
+        };
+
+        const quoteOption = document.createElement("a");
+        quoteOption.innerText = "Quote";
+        quoteOption.onclick = (e) => {
+          e.stopPropagation();
+          setupQuote(key, data);
+          dropdown.style.display = "none";
+        };
+
+        dropdown.appendChild(replyOption);
+        dropdown.appendChild(quoteOption);
+      }
+
+      msgDiv.appendChild(menuIcon);
+      msgDiv.appendChild(dropdown);
+
+      menuIcon.onclick = (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+      };
+
+      document.addEventListener("click", () => {
+        dropdown.style.display = "none";
+      }, { once: true });
 
       return msgDiv;
     }
@@ -839,6 +1123,9 @@ function showInstallPromotion() {
         input.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 300);
     });
+
+
+
   </script>
 </body>
 </html>
